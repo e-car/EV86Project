@@ -110,6 +110,7 @@ void loop() {
         Serial.print("Get [");
         Serial.print(revChar);
         Serial.print("] -> Send  : ");
+        // クライアントからのリクエストの受け取りとその処理
         /***********************************************************************************/
         switch(revChar) {  
           case 'G':
@@ -124,13 +125,13 @@ void loop() {
             Serial.println("client disonnected");
             break;
           case 'D':
+            // センサーデータ取得 from XBee
             Serial.println("Sensor Data by XBee");
-            // センサーデータ取得  
-            // get sensorData from XBee
+            /*****************************************************************/
             gettingData(router);
-            Serial.println("*******************************************");
-            // get sensorData from XBee  
+            Serial.println("*******************************************"); 
             gettingData(router2);  
+            /*****************************************************************/
             
             // send router1 data to client by wifi
             if (router.firstTrans && router.transmit) {

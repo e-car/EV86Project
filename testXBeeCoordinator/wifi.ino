@@ -13,7 +13,7 @@ void setWiFi() {
     int timeOutCount_WiFi = 0;
     // attempt to connect to WiFi network:
     while(status != WL_CONNECTED) {
-      Serial.print("Attempting ot connect to SSID : ");
+      Serial.print("Attempting to connect to SSID : ");
       Serial.println(ssid);
       // connect to WPA/WPA2 network. change this line if using open or WEP network;
       status = WiFi.begin(ssid, pass);

@@ -10,10 +10,9 @@ char pass[] = "iebiu6ichxufg"; // your network password (use for WPA, or use as 
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 int timeoutCount = 0;
-WiFiClient client;
-WiFiClient lastClient;
-WiFiServer server(3000); // 3000番ポートを指定
-int timeOutConnect = 0;
+WiFiServer server(9090); // 9090番ポートを指定
+int socketTimeCount = 0;
+const int socketTimeOut = 500;
 boolean connectStatus;
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 
@@ -30,8 +29,8 @@ typedef struct {
 } XBeeNode;
 
 // ルーター情報の設定
-XBeeNode router = { 0x0013A200, 0x40993791, "EDISON", "startAck1", "None", 30, false, false };
-XBeeNode router2 = { 0x0013A200, 0x40707DF7, "MEGA", "startAck2", "None", 30, false, false };
+XBeeNode router = { 0x0013A200, 0x40993791, "EDISON", "startAck1", "None", 50, false, false };
+XBeeNode router2 = { 0x0013A200, 0x40707DF7, "MEGA", "startAck2", "None", 50, false, false };
 // コーディネーター用のインスタンスを生成
 EV86XBeeC coor = EV86XBeeC();
 // EV86インスタンス生成
@@ -63,6 +62,7 @@ void setup() {
   
   // set WiFi
   setWiFi();
+  delay(1000);
   
   // ホストXBeeの内部受信バッファをフラッシュする
   coor.bufFlush();
@@ -88,59 +88,113 @@ void setup() {
 }
 
 void loop() {  
-  Serial.println("[[[[[[[[[[[[[[[ loop start ]]]]]]]]]]]]]]]");
-  Serial.println("-------------------------------------------------"); 
+  Serial.println("[[[[[[ loop start ]]]]]]");
   //　サーバー(Edison)として指定したポートにクライアント(Android)からのアクセスがあるか確認。あれば、接続する 
-  client = server.available();
+  WiFiClient client = server.available();
   Serial.print("Client Status : ");
   Serial.println(client);
 
   // クライアント(Android)が存在する場合
   if (client) { 
+    Serial.println("New Client");
     // クライアント(Android)とサーバー(Edison)
     // 処理に約5秒かかる
-    connectStatus = client.connected();
-    Serial.print("Connect Status : ");
-    Serial.println(connectStatus);
+    while ((connectStatus = client.connected())) { // 注意!! client.connected()関数にはバグあり!
+      Serial.print("Socket TimeCount : ");
+      Serial.println(socketTimeCount);
+      Serial.print("Connect Status : ");
+      Serial.println(connectStatus);
+      if (client.available() > 0) {
+        socketTimeCount = 0;
+        char revChar = client.read(); // read from TCP buffer
+        Serial.print("Get [");
+        Serial.print(revChar);
+        Serial.print("] -> Send  : ");
+        /***********************************************************************************/
+        switch(revChar) {  
+          case 'G':
+            Serial.println("test EV86 car data");
+            client.println("test EV86 car data");
+            break;
+          case 'S':
+            // close the connection:
+            Serial.println("Stop Signal & Close Socket");
+            client.flush();
+            client.stop();
+            Serial.println("client disonnected");
+            break;
+          case 'D':
+            Serial.println("Sensor Data by XBee");
+            // センサーデータ取得  
+            // get sensorData from XBee
+            gettingData(router);
+            Serial.println("*******************************************");
+            // get sensorData from XBee  
+            gettingData(router2);  
+            
+            // send router1 data to client by wifi
+            if (router.firstTrans && router.transmit) {
+              Serial.println(router.sensorData);
+              client.println(router.sensorData);
+            } else {
+              Serial.println("Couldn't get router.sensorData");
+              client.println("Couldn't get router.sensorData");
+            }
+            // send router2 data to client by wifi
+            if (router2.firstTrans && router2.transmit) {
+              Serial.println(router2.sensorData);
+              client.println(router2.sensorData);
+            } else {
+              Serial.println("Couldn't get router2.sensorData");
+              client.println("Couldn't get router2.sensorData");
+            }
+            break;
+          default:
+            Serial.println("Error");
+            client.println("Error");
+            break;
+        }
+        /***********************************************************************************/
+      } else {
+        socketTimeCount++;
+      }
     
-    if (connectStatus) {
-      Serial.println("Connected to Client");
-
-      // センサーデータ取得  
-      gettingData(router);
-      client.println(router.sensorData);
-      Serial.println("*******************************************");  
-      gettingData(router2);  
-      client.println(router2.sensorData);
-  
-      client.flush();
-      client.stop();
+      // 接続状態の確認
+      // router firstTrans
+      Serial.print(router.nodeName);
+      Serial.print(" First Connect Status : ");
+      Serial.println(router.firstTrans);
+      // router
+      Serial.print(router.nodeName);
+      Serial.print(" Connect Status : ");
+      Serial.println(router.transmit);
+      
+      // router2 firstTrans
+      Serial.print(router2.nodeName);
+      Serial.print(" First Connect Status : ");
+      Serial.println(router2.firstTrans);
+      // router2
+      Serial.print(router2.nodeName);
+      Serial.print(" Connect Status : ");
+      Serial.println(router2.transmit);
+      Serial.println();
+      Serial.println("-------------------------------------------------");
+      delay(100);
+      
+      // 一定時間クライアントから応答がなければ、サーバー側からSocketを切る * client.connected()のバグ対策
+      if (socketTimeCount > socketTimeOut) {
+        Serial.println("Socket TimeOut. close Socket from this server");
+        client.flush();
+        client.stop();
+        break;
+      }
     }
-  } else {
-    Serial.println("No Client");
   }
-  
-  // 接続状態の確認
-  // router firstTrans
-  Serial.print(router.nodeName);
-  Serial.print(" First Connect Status : ");
-  Serial.println(router.firstTrans);
-  // router
-  Serial.print(router.nodeName);
-  Serial.print(" Connect Status : ");
-  Serial.println(router.transmit);
-  
-  // router2 firstTrans
-  Serial.print(router2.nodeName);
-  Serial.print(" First Connect Status : ");
-  Serial.println(router2.firstTrans);
-  // router2
-  Serial.print(router2.nodeName);
-  Serial.print(" Connect Status : ");
-  Serial.println(router2.transmit);
-  Serial.println("-------------------------------------------------");
-  delay(1000);
+  delay(500);
 }
+
+
+
 
 
 void connectProcess(XBeeNode& router) {
@@ -211,8 +265,6 @@ void connectProcess(XBeeNode& router) {
 }
 
 
-
-
 // ポーリングによる各XBeeへのリクエスト送信とレスポンス受信
 void gettingData(XBeeNode& router) {
   // センサーデータ要求
@@ -252,7 +304,6 @@ void gettingData(XBeeNode& router) {
     
     delay(20);  
   };
-  
   // 受信データの初期化
   coor.clearData();
 }

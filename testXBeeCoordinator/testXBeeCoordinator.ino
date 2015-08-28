@@ -5,14 +5,14 @@
 #include "ev86XBee.h"
 
 /* -------------------------------- Wifi Parameters  -------------------------------- */
-char ssid[] = "BUFFALO-4C7A25"; // your network SSID (name), nakayama:506A 304HWa-84F1A0
-char pass[] = "iebiu6ichxufg"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 11237204a
+char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A 304HWa-84F1A0 BUFFALO-4C7A25
+char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 11237204a iebiu6ichxufg
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 int timeoutCount = 0;
 WiFiServer server(9090); // 9090番ポートを指定
 int socketTimeCount = 0;
-const int socketTimeOut = 500;
+const int socketTimeOut = 20;
 boolean connectStatus;
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 
@@ -83,7 +83,7 @@ void setup() {
 //  delay(2000);
   
   //コネクション確立のためのセッション
-  connectProcess(router);
+ // connectProcess(router);
   connectProcess(router2);
 }
 
@@ -97,6 +97,7 @@ void loop() {
   // クライアント(Android)が存在する場合
   if (client) { 
     Serial.println("New Client");
+    socketTimeCount = 0;
     // クライアント(Android)とサーバー(Edison)
     // 処理に約5秒かかる
     while ((connectStatus = client.connected())) { // 注意!! client.connected()関数にはバグあり!
@@ -128,19 +129,19 @@ void loop() {
             // センサーデータ取得 from XBee
             Serial.println("Sensor Data by XBee");
             /*****************************************************************/
-            gettingData(router);
+            //gettingData(router);
             Serial.println("*******************************************"); 
             gettingData(router2);  
             /*****************************************************************/
             
-            // send router1 data to client by wifi
-            if (router.firstTrans && router.transmit) {
-              Serial.println(router.sensorData);
-              client.println(router.sensorData);
-            } else {
-              Serial.println("Couldn't get router.sensorData");
-              client.println("Couldn't get router.sensorData");
-            }
+//            // send router1 data to client by wifi
+//            if (router.firstTrans && router.transmit) {
+//              Serial.println(router.sensorData);
+//              client.println(router.sensorData);
+//            } else {
+//              Serial.println("Couldn't get router.sensorData");
+//              client.println("Couldn't get router.sensorData");
+//            }
             // send router2 data to client by wifi
             if (router2.firstTrans && router2.transmit) {
               Serial.println(router2.sensorData);
@@ -160,15 +161,15 @@ void loop() {
         socketTimeCount++;
       }
     
-      // 接続状態の確認
-      // router firstTrans
-      Serial.print(router.nodeName);
-      Serial.print(" First Connect Status : ");
-      Serial.println(router.firstTrans);
-      // router
-      Serial.print(router.nodeName);
-      Serial.print(" Connect Status : ");
-      Serial.println(router.transmit);
+//      // 接続状態の確認
+//      // router firstTrans
+//      Serial.print(router.nodeName);
+//      Serial.print(" First Connect Status : ");
+//      Serial.println(router.firstTrans);
+//      // router
+//      Serial.print(router.nodeName);
+//      Serial.print(" Connect Status : ");
+//      Serial.println(router.transmit);
       
       // router2 firstTrans
       Serial.print(router2.nodeName);
@@ -193,9 +194,6 @@ void loop() {
   }
   delay(500);
 }
-
-
-
 
 
 void connectProcess(XBeeNode& router) {

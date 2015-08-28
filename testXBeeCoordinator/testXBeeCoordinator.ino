@@ -317,7 +317,7 @@ void gettingData(XBeeNode& router) {
       count++;
     }
     
-    delay(20);  
+    delay(30);  
   };
   // 受信データの初期化
   coor.clearData();

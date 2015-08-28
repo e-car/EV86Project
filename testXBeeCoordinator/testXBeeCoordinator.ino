@@ -59,32 +59,32 @@ void setup() {
   Serial1.flush();                             // serial bufferをクリア
   coor.begin(Serial1);                         // XBeeにSerialの情報を渡す
   delay(5000);                                 // XBeeの初期化のために5秒間待機
-  
-  // set WiFi
-  setWiFi();
-  delay(1000);
-  
+   
   // ホストXBeeの内部受信バッファをフラッシュする
   coor.bufFlush();
   delay(1000);
   
-//  // ホストXBeeの設定確認
-//  coor.hsXBeeStatus();                     
-//  delay(2000);
+  // ホストXBeeの設定確認
+  coor.hsXBeeStatus();                     
+  delay(2000);
   
 //  // リモートXBeeのアドレス指定と設定情報の取得
 //  coor.setDstAdd64(router.h64Add, router.l64Add);
 //  coor.rmXBeeStatus();
 //  delay(2000);
   
-//  // リモートXBeeのアドレス指定と設定情報の取得
-//  coor.setDstAdd64(router2.h64Add, router2.l64Add);
-//  coor.rmXBeeStatus();
-//  delay(2000);
+  // リモートXBeeのアドレス指定と設定情報の取得
+  coor.setDstAdd64(router2.h64Add, router2.l64Add);
+  coor.rmXBeeStatus();
+  delay(2000);
   
   //コネクション確立のためのセッション
- // connectProcess(router);
+  //connectProcess(router);
   connectProcess(router2);
+  
+  // set WiFi
+  //setWiFi();
+  delay(1000);
 }
 
 void loop() {  
@@ -105,6 +105,7 @@ void loop() {
       Serial.println(socketTimeCount);
       Serial.print("Connect Status : ");
       Serial.println(connectStatus);
+      
       if (client.available() > 0) {
         socketTimeCount = 0;
         char revChar = client.read(); // read from TCP buffer
@@ -115,18 +116,7 @@ void loop() {
         /***********************************************************************************/
         switch(revChar) {  
           case 'G':
-            Serial.println("test EV86 car data");
-            client.println("test EV86 car data");
-            break;
-          case 'S':
-            // close the connection:
-            Serial.println("Stop Signal & Close Socket");
-            client.flush();
-            client.stop();
-            Serial.println("client disonnected");
-            break;
-          case 'D':
-            // センサーデータ取得 from XBee
+          // センサーデータ取得 from XBee
             Serial.println("Sensor Data by XBee");
             /*****************************************************************/
             //gettingData(router);
@@ -134,14 +124,14 @@ void loop() {
             gettingData(router2);  
             /*****************************************************************/
             
-//            // send router1 data to client by wifi
-//            if (router.firstTrans && router.transmit) {
-//              Serial.println(router.sensorData);
-//              client.println(router.sensorData);
-//            } else {
-//              Serial.println("Couldn't get router.sensorData");
-//              client.println("Couldn't get router.sensorData");
-//            }
+            // send router1 data to client by wifi
+            if (router.firstTrans && router.transmit) {
+              Serial.println(router.sensorData);
+              client.println(router.sensorData);
+            } else {
+              Serial.println("Couldn't get router.sensorData");
+              client.println("Couldn't get router.sensorData");
+            }
             // send router2 data to client by wifi
             if (router2.firstTrans && router2.transmit) {
               Serial.println(router2.sensorData);
@@ -151,9 +141,23 @@ void loop() {
               client.println("Couldn't get router2.sensorData");
             }
             break;
+          
+          case 'T':
+            Serial.println("test EV86 car data");
+            client.println("test EV86 car data");
+            break;
+            
+          case 'S':
+            // close the connection:
+            Serial.println("Stop Signal & Close Socket");
+            client.flush();
+            client.stop();
+            Serial.println("client disonnected");
+            break;
+          
           default:
-            Serial.println("Error");
-            client.println("Error");
+            Serial.println("Error : Request from Client is invalid");
+            client.println("Error : Request from Client is invalid");
             break;
         }
         /***********************************************************************************/
@@ -161,15 +165,15 @@ void loop() {
         socketTimeCount++;
       }
     
-//      // 接続状態の確認
-//      // router firstTrans
-//      Serial.print(router.nodeName);
-//      Serial.print(" First Connect Status : ");
-//      Serial.println(router.firstTrans);
-//      // router
-//      Serial.print(router.nodeName);
-//      Serial.print(" Connect Status : ");
-//      Serial.println(router.transmit);
+      // 接続状態の確認
+      // router firstTrans
+      Serial.print(router.nodeName);
+      Serial.print(" First Connect Status : ");
+      Serial.println(router.firstTrans);
+      // router
+      Serial.print(router.nodeName);
+      Serial.print(" Connect Status : ");
+      Serial.println(router.transmit);
       
       // router2 firstTrans
       Serial.print(router2.nodeName);
@@ -195,10 +199,8 @@ void loop() {
   delay(500);
 }
 
-
+// コネクション確立のためのプロセス
 void connectProcess(XBeeNode& router) {
-  // コネクション確立のためのセッション
-  /* ------------------------------------------------- */
   // coor →  router
   // coor ← router
   // coor →  router
@@ -213,31 +215,29 @@ void connectProcess(XBeeNode& router) {
   coor.sendData(startReq);
   Serial.println("[[[ send startReq ]]]");
   
-  // この遅延処理は重要！
-  delay(200);
   
-  // ルーターから接続応答が来ているかチェック
   // 受信パケットの確認
   Serial.print("[get Packet from ");
   Serial.print(router.nodeName);
   Serial.println("]");
-  for (int apiID, i = 0; (apiID = coor.getPacket()) != ZB_RX_RESPONSE && !coor.checkData(router.startAck); i++) {
     
+  // ルーターから接続応答が来ているかチェック  
+  for (int apiID, i = 0; (apiID = coor.getPacket()) != ZB_RX_RESPONSE && !coor.checkData(router.startAck); i++) {  
     // タイムアウトの確認
     Serial.print("timecount : ");
     Serial.println(i);
-    
+  
     // timeoutを超過したらルータへの接続要求を再送信する
     if (i > router.timeout) {
       coor.setDstAdd64(router.h64Add, router.l64Add);
       coor.sendData(startReq);
       i = 0;
-      Serial.println("[[[ send startReq again ]]]\n");
+      Serial.println("[[[ send startReq again ]]]");
     }
-    
+     
     // 受信データの初期化
     coor.clearData();
-    delay(200);
+    delay(30);
   }
   
   // 接続応答を送信
@@ -245,21 +245,35 @@ void connectProcess(XBeeNode& router) {
   coor.sendData(startAck);
   Serial.println("send startAck\n");
   
-  delay(500);
-  
-  // 受信パケットの確認 
-  Serial.println("[get Packet]"); 
-  coor.getPacket();
-    
-  // コネクションの確立
-  Serial.print("[[[ Connected with Router in ");
-  Serial.print(router.nodeName);
-  Serial.println(" ]]]");
-  Serial.println("-------------------------------------------------------------");
-  router.firstTrans = true;
+  // 受信パケットの確認
+  Serial.println("[get Packet]");
+  int count = 0;
+  while (true) {  
+    int apiID = coor.getPacket();
+      
+    if (apiID == ZB_TX_STATUS_RESPONSE) {
+      if (coor.getConnectStatus() == SUCCESS) {
+         router.firstTrans = true;
+         break; 
+      }
+    }
+    delay(30);  
+  };
   
   // 受信データの初期化
   coor.clearData();
+    
+  // コネクションの確立の有無
+  if (router.firstTrans == true) {
+    Serial.print("[[[ Connected with Router in ");
+    Serial.print(router.nodeName);
+    Serial.println(" ]]]");
+  } else {
+    Serial.print("[[[ Disconnected with Router in ");
+    Serial.print(router.nodeName);
+    Serial.println(" ]]]");
+  }
+    Serial.println("-------------------------------------------------------------");
   /* ------------------------------------------------- */
 }
 
@@ -275,9 +289,6 @@ void gettingData(XBeeNode& router) {
   Serial.print(router.nodeName);
   Serial.println("]");
   
-  // この遅延処理は重要！
-  //delay(500);
-  
   // 受信パケットの確認
   int count = 0;
   while (true) {  
@@ -285,6 +296,10 @@ void gettingData(XBeeNode& router) {
     
     if (count > router.timeout) {
       router.transmit = false;
+      coor.bufFlush();
+      Serial.print("Couldn't receive seonsor data from");
+      Serial.print(router.nodeName);
+      Serial.println(" on XBee Network");
       break;
     }
       
@@ -298,8 +313,9 @@ void gettingData(XBeeNode& router) {
       break;
     }  
       
-    if (apiID < 0)
+    if (apiID < 0) {
       count++;
+    }
     
     delay(20);  
   };

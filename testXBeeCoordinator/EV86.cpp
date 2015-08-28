@@ -15,7 +15,6 @@ EV86::EV86() {
     bttryMainCurr = 0.0;
     bttry12Volt = 0.0;
     bttry12Curr = 0.0;
-    
     motorTemp = 0.0;
     mcTemp = 0.0;
 }

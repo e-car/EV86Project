@@ -8,8 +8,8 @@
 *
 */
 
-//#define MEGA
-#define EDISON
+#define MEGA
+//#define EDISON
 
 // ヘッダーのインクルード
 #ifdef MEGA
@@ -68,13 +68,13 @@ void setup() {
   router.bufFlush();                         
   delay(1000);
   
-//  // ホストXBeeの設定確認用メソッド
-//  router.hsXBeeStatus();                     
-//  delay(2000);
+  // ホストXBeeの設定確認用メソッド
+  router.hsXBeeStatus();                     
+  delay(2000);
   
-//  // リモートXBeeの情報を確認
-//  router.setDstAdd64(coor.h64Add, coor.l64Add);
-//  router.rmXBeeStatus();
+  // リモートXBeeの情報を確認
+  router.setDstAdd64(coor.h64Add, coor.l64Add);
+  router.rmXBeeStatus();
   Serial.println("Finish checking destination xbee node parameters");
   delay(2000);
 }

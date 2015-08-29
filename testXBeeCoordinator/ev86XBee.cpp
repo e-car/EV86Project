@@ -46,7 +46,7 @@ void EV86XBee::sendData(String str) {
     Serial.println("can't send data due to too send data !");
   } else {
     uint8_t reqArray[str.length() + 1]; 
-    str.getBytes(reqArray, (str.length() + 1));
+    str.getBytes(reqArray, str.length() + 1);
     _zbTxRequest = ZBTxRequest(_dstAdd64, reqArray, (uint8_t)sizeof(reqArray)); 
     _xbee.send(_zbTxRequest);
   }

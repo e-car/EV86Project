@@ -1,3 +1,8 @@
+/*
+* XBee-WiFiシステムのプログラム
+*/
+
+
 // ヘッダーのインクルード
 #include <signal.h> // you must write down this line to resolve problem between WiFiSocket and Serial communication
 #include <WiFi.h>
@@ -5,13 +10,13 @@
 #include "ev86XBee.h"
 
 /* -------------------------------- Wifi Parameters  -------------------------------- */
-char ssid[] = "BUFFALO-4C7A25"; // your network SSID (name), nakayama:506A 304HWa-84F1A0
-char pass[] = "iebiu6ichxufg"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 11237204a
+char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A 304HWa-84F1A0 BUFFALO-4C7A25
+char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 11237204a iebiu6ichxufg
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
-int timeoutCount = 0;
 WiFiServer server(9090); // 9090番ポートを指定
 int socketTimeCount = 0;
+<<<<<<< HEAD
 const int socketTimeOut = 200;
 boolean connectStatus;
 /* -------------------------------- Wifi Parameters  -------------------------------- */
@@ -59,32 +64,32 @@ void setup() {
   Serial1.flush();                             // serial bufferをクリア
   coor.begin(Serial1);                         // XBeeにSerialの情報を渡す
   delay(5000);                                 // XBeeの初期化のために5秒間待機
-  
-  // set WiFi
-  setWiFi();
-  delay(1000);
-  
+   
   // ホストXBeeの内部受信バッファをフラッシュする
   coor.bufFlush();
   delay(1000);
   
-//  // ホストXBeeの設定確認
-//  coor.hsXBeeStatus();                     
-//  delay(2000);
+  // ホストXBeeの設定確認
+  coor.hsXBeeStatus();                     
+  delay(2000);
   
 //  // リモートXBeeのアドレス指定と設定情報の取得
 //  coor.setDstAdd64(router.h64Add, router.l64Add);
 //  coor.rmXBeeStatus();
 //  delay(2000);
   
-//  // リモートXBeeのアドレス指定と設定情報の取得
-//  coor.setDstAdd64(router2.h64Add, router2.l64Add);
-//  coor.rmXBeeStatus();
-//  delay(2000);
+  // リモートXBeeのアドレス指定と設定情報の取得
+  coor.setDstAdd64(router2.h64Add, router2.l64Add);
+  coor.rmXBeeStatus();
+  delay(2000);
   
   //コネクション確立のためのセッション
-  connectProcess(router);
+  //connectProcess(router);
   connectProcess(router2);
+  
+  // set WiFi
+  //setWiFi();
+  delay(1000);
 }
 
 void loop() {  
@@ -97,6 +102,7 @@ void loop() {
   // クライアント(Android)が存在する場合
   if (client) { 
     Serial.println("New Client");
+    socketTimeCount = 0;
     // クライアント(Android)とサーバー(Edison)
     // 処理に約5秒かかる
     while ((connectStatus = client.connected())) { // 注意!! client.connected()関数にはバグあり!
@@ -104,6 +110,7 @@ void loop() {
       Serial.println(socketTimeCount);
       Serial.print("Connect Status : ");
       Serial.println(connectStatus);
+      
       if (client.available() > 0) {
         socketTimeCount = 0;
         char revChar = client.read(); // read from TCP buffer
@@ -114,21 +121,10 @@ void loop() {
         /***********************************************************************************/
         switch(revChar) {  
           case 'G':
-            Serial.println("test EV86 car data");
-            client.println("test EV86 car data");
-            break;
-          case 'S':
-            // close the connection:
-            Serial.println("Stop Signal & Close Socket");
-            client.flush();
-            client.stop();
-            Serial.println("client disonnected");
-            break;
-          case 'D':
-            // センサーデータ取得 from XBee
+          // センサーデータ取得 from XBee
             Serial.println("Sensor Data by XBee");
             /*****************************************************************/
-            gettingData(router);
+            //gettingData(router);
             Serial.println("*******************************************"); 
             gettingData(router2);  
             /*****************************************************************/
@@ -150,9 +146,23 @@ void loop() {
               client.println("Couldn't get router2.sensorData");
             }
             break;
+          
+          case 'T':
+            Serial.println("test EV86 car data");
+            client.println("test EV86 car data");
+            break;
+            
+          case 'S':
+            // close the connection:
+            Serial.println("Stop Signal & Close Socket");
+            client.flush();
+            client.stop();
+            Serial.println("client disonnected");
+            break;
+          
           default:
-            Serial.println("Error");
-            client.println("Error");
+            Serial.println("Error : Request from Client is invalid");
+            client.println("Error : Request from Client is invalid");
             break;
         }
         /***********************************************************************************/
@@ -194,13 +204,8 @@ void loop() {
   delay(500);
 }
 
-
-
-
-
+// コネクション確立のためのプロセス
 void connectProcess(XBeeNode& router) {
-  // コネクション確立のためのセッション
-  /* ------------------------------------------------- */
   // coor →  router
   // coor ← router
   // coor →  router
@@ -215,31 +220,29 @@ void connectProcess(XBeeNode& router) {
   coor.sendData(startReq);
   Serial.println("[[[ send startReq ]]]");
   
-  // この遅延処理は重要！
-  delay(200);
   
-  // ルーターから接続応答が来ているかチェック
   // 受信パケットの確認
   Serial.print("[get Packet from ");
   Serial.print(router.nodeName);
   Serial.println("]");
-  for (int apiID, i = 0; (apiID = coor.getPacket()) != ZB_RX_RESPONSE && !coor.checkData(router.startAck); i++) {
     
+  // ルーターから接続応答が来ているかチェック  
+  for (int apiID, i = 0; (apiID = coor.getPacket()) != ZB_RX_RESPONSE && !coor.checkData(router.startAck); i++) {  
     // タイムアウトの確認
     Serial.print("timecount : ");
     Serial.println(i);
-    
+  
     // timeoutを超過したらルータへの接続要求を再送信する
     if (i > router.timeout) {
       coor.setDstAdd64(router.h64Add, router.l64Add);
       coor.sendData(startReq);
       i = 0;
-      Serial.println("[[[ send startReq again ]]]\n");
+      Serial.println("[[[ send startReq again ]]]");
     }
-    
+     
     // 受信データの初期化
     coor.clearData();
-    delay(200);
+    delay(30);
   }
   
   // 接続応答を送信
@@ -247,21 +250,35 @@ void connectProcess(XBeeNode& router) {
   coor.sendData(startAck);
   Serial.println("send startAck\n");
   
-  delay(500);
-  
-  // 受信パケットの確認 
-  Serial.println("[get Packet]"); 
-  coor.getPacket();
-    
-  // コネクションの確立
-  Serial.print("[[[ Connected with Router in ");
-  Serial.print(router.nodeName);
-  Serial.println(" ]]]");
-  Serial.println("-------------------------------------------------------------");
-  router.firstTrans = true;
+  // 受信パケットの確認
+  Serial.println("[get Packet]");
+  int count = 0;
+  while (true) {  
+    int apiID = coor.getPacket();
+      
+    if (apiID == ZB_TX_STATUS_RESPONSE) {
+      if (coor.getConnectStatus() == SUCCESS) {
+         router.firstTrans = true;
+         break; 
+      }
+    }
+    delay(30);  
+  };
   
   // 受信データの初期化
   coor.clearData();
+    
+  // コネクションの確立の有無
+  if (router.firstTrans == true) {
+    Serial.print("[[[ Connected with Router in ");
+    Serial.print(router.nodeName);
+    Serial.println(" ]]]");
+  } else {
+    Serial.print("[[[ Disconnected with Router in ");
+    Serial.print(router.nodeName);
+    Serial.println(" ]]]");
+  }
+    Serial.println("-------------------------------------------------------------");
   /* ------------------------------------------------- */
 }
 
@@ -277,9 +294,6 @@ void gettingData(XBeeNode& router) {
   Serial.print(router.nodeName);
   Serial.println("]");
   
-  // この遅延処理は重要！
-  //delay(500);
-  
   // 受信パケットの確認
   int count = 0;
   while (true) {  
@@ -287,6 +301,10 @@ void gettingData(XBeeNode& router) {
     
     if (count > router.timeout) {
       router.transmit = false;
+      coor.bufFlush();
+      Serial.print("Couldn't receive seonsor data from");
+      Serial.print(router.nodeName);
+      Serial.println(" on XBee Network");
       break;
     }
       
@@ -300,10 +318,11 @@ void gettingData(XBeeNode& router) {
       break;
     }  
       
-    if (apiID < 0)
+    if (apiID < 0) {
       count++;
+    }
     
-    delay(20);  
+    delay(30);  
   };
   // 受信データの初期化
   coor.clearData();

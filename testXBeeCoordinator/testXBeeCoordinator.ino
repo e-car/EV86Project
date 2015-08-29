@@ -1,3 +1,8 @@
+/*
+* XBee-WiFiシステムのプログラム
+*/
+
+
 // ヘッダーのインクルード
 #include <signal.h> // you must write down this line to resolve problem between WiFiSocket and Serial communication
 #include <WiFi.h>

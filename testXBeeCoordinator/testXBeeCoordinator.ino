@@ -9,7 +9,6 @@ char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A 304H
 char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 11237204a iebiu6ichxufg
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
-int timeoutCount = 0;
 WiFiServer server(9090); // 9090番ポートを指定
 int socketTimeCount = 0;
 const int socketTimeOut = 20;

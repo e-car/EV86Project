@@ -16,8 +16,7 @@ int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 WiFiServer server(9090); // 9090番ポートを指定
 int socketTimeCount = 0;
-<<<<<<< HEAD
-const int socketTimeOut = 200;
+const int socketTimeOut = 20;
 boolean connectStatus;
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 

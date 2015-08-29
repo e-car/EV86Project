@@ -8,14 +8,11 @@
 #include "EV86.h"
 
 // コンストラクタ
-EV86::EV86() {
-    fieldNum = FIELD_NUM;
-    
+EV86::EV86() { 
     bttryMainVolt = 0.0;
     bttryMainCurr = 0.0;
     bttry12Volt = 0.0;
-    bttry12Curr = 0.0;
-    
+    bttry12Curr = 0.0; 
     motorTemp = 0.0;
     mcTemp = 0.0;
 }
@@ -74,7 +71,6 @@ float EV86::get12vPower() {
 ///* making protocol for sending EV86 data from Edison to Application clinet, for example Android or iPhone */
 //String EV86::makePackage() {
 //  String str = "#"; // set Start Mark up Sign
-//  str += (String(getFieldNum()) + " "); // set the number of ev86 data
 //  str += (float2String(getMainVolt()) + "  ");
 //  str += (float2String(getMainCurr()) + "  ");
 //  str += (float2String(get12Volt()) + "  ");
@@ -84,10 +80,6 @@ float EV86::get12vPower() {
 //  return str;
 //}
 
-// 定義変数の数を取得
-int EV86::getFieldNum() { 
-  return fieldNum; 
-}
 
 // メインバッテリー電圧を取得
 float EV86::getMainVolt() {

@@ -10,20 +10,12 @@
 #define _EV86_h
 #include <String.h>
 
-#define FIELD_NUM 6
-
 class EV86 {
 private:
-    /* fields */   
-    int fieldNum; // the numbers of paramiter in EV86
-    
-    // voltage and current of both main and 12v battery
     float bttryMainVolt;
     float bttryMainCurr;
     float bttry12Volt;
     float bttry12Curr;
-    
-    // temparatures
     float motorTemp;
     float mcTemp;
     
@@ -46,7 +38,6 @@ public:
     
     // getter
     //String makePackage();
-    int   getFieldNum();
     float getMainVolt();
     float getMainCurr();
     float get12Volt();

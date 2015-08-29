@@ -12,7 +12,7 @@ int status = WL_IDLE_STATUS;
 int timeoutCount = 0;
 WiFiServer server(9090); // 9090番ポートを指定
 int socketTimeCount = 0;
-const int socketTimeOut = 500;
+const int socketTimeOut = 200;
 boolean connectStatus;
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 

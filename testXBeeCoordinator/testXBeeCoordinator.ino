@@ -11,8 +11,8 @@
 #include "rgb_lcd.h"
 
 /* -------------------------------- Wifi Parameters  -------------------------------- */
-char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A 304HWa-84F1A0 BUFFALO-4C7A25
-char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 11237204a iebiu6ichxufg
+char ssid[] = "BUFFALO-4C7A25"; // your network SSID (name), nakayama:506A 304HWa-84F1A0 iPhone_shinichi
+char pass[] = "iebiu6ichxufg"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 11237204a 252554123sin
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 WiFiServer server(9090); // 9090番ポートを指定
@@ -110,7 +110,7 @@ void setup() {
   lcd.print("Checked STATUS");
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router2.nodeName);
-  delay(1500);
+  delay(2000);
   
   
   lcd.clear();
@@ -153,9 +153,8 @@ void setup() {
   
   
   // set WiFi
-  //setWiFi();
-  delay(1000);
-  lcd.clear();
+  setWiFi();
+  delay(3000);
 }
 
 void loop() {  

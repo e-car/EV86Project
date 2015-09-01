@@ -1,40 +1,79 @@
+
+
 // Wifiセットアップ用関数
-void setWiFi() {
-   /*  WiFi setup */
-    String fv = WiFi.firmwareVersion();
-    if( fv != "1.1.0" ) {
-      Serial.println("Please upgrade the firmware");
-    }
-    else {
-      Serial.print("Your WiFi Version OK :");
-      Serial.println(fv);
-    }
+int setWiFi() {
+  /*  WiFi setup */
+  lcd.clear();
+  lcd.setCursor(0, 0); // (0列, 0行)
+  lcd.print("Setting WiFi");
+  
+  String fv = WiFi.firmwareVersion();
+  if( fv != "1.1.0" ) {
+    Serial.println("Please upgrade the firmware");
+    lcd.clear();
+    lcd.setCursor(0, 0); // (0列, 0行)
+    lcd.print("Please upgrade");
+    lcd.setCursor(0, 1); // (0列, 1行)
+    lcd.print("WiFi firmware");
+  }
+  else {
+    Serial.print("Your WiFi Version OK :");
+    Serial.println(fv);
+  }
+  
+  lcd.clear();
+  lcd.setCursor(0, 0); // (0列, 0行)
+  lcd.print("Try to connect");
+  lcd.setCursor(0, 1); // (0列, 1行)
+  lcd.print("to WiFi");
+  delay(1500);
+  
+  lcd.clear();
+  lcd.setCursor(0, 0); // (0列, 0行)
+  lcd.print("SSID:");
+  lcd.print(ssid);
+  lcd.setCursor(0, 1); // (0列, 1行)
+  int lcCursor = 0;
+  int timeOutCount_WiFi = 0;
+  // attempt to connect to WiFi network:
+  while(status != WL_CONNECTED) {
+    Serial.print("Attempting to connect to SSID : ");
+    Serial.println(ssid);
     
-    int timeOutCount_WiFi = 0;
-    // attempt to connect to WiFi network:
-    while(status != WL_CONNECTED) {
-      Serial.print("Attempting to connect to SSID : ");
-      Serial.println(ssid);
-      // connect to WPA/WPA2 network. change this line if using open or WEP network;
-      status = WiFi.begin(ssid, pass);
-      // wait 5 seconds for connection
-      delay(5000);
+    if (lcCursor > 15) {
+      lcd.clear();
+      lcd.setCursor(0, 0); // (0列, 0行)
+      lcd.print("SSID:");
+      lcd.print(ssid);
+      lcd.setCursor(0, 1); // (0列, 1行)
+      lcCursor = 0;
+    }
+     
+    lcd.setCursor(lcCursor, 1);
+    lcd.print("#");  
       
-      if(timeOutCount_WiFi > 20) {
-        Serial.println("Couldn't connect to WiFi network. Please try again to implement your Application Progaram");
-        while(true); // !!!!!!!!!!!!!
-      }
-      timeOutCount_WiFi++;
+    // connect to WPA/WPA2 network. change this line if using open or WEP network;
+    status = WiFi.begin(ssid, pass);
+    // wait 5 seconds for connection
+    delay(5000);
+    
+    if(timeOutCount_WiFi > 20) {
+      Serial.println("Couldn't connect to WiFi network. Please try again to implement your Application Progaram");
+      while(true); // !!!!!!!!!!!!!
     }
-    timeOutCount_WiFi = 0;
-    Serial.println("WiFi Connection OK");
+    timeOutCount_WiFi++;
+    lcCursor++;
     
-    /* server setup */
-    server.begin(); // open server
-    Serial.println("Open Server");
-    
-    // you're connected now, so print out the status:
-    printWifiStatus();
+  }
+  timeOutCount_WiFi = 0;
+  Serial.println("WiFi Connection OK");
+  
+  /* server setup */
+  server.begin(); // open server
+  Serial.println("Open Server");
+  
+  // you're connected now, so print out the status:
+  printWifiStatus();
 }
 
 /* output WiFi condition  */
@@ -53,4 +92,12 @@ void printWifiStatus() {
   Serial.print("signal strength (RSSI):");
   Serial.print(rssi);
   Serial.println(" dBm");
+  
+  // LCDにSSIDとIPアドレスを表示
+  lcd.clear();
+  lcd.setCursor(0, 0); // (0列, 0行)
+  lcd.print("SSID:");
+  lcd.print(WiFi.SSID());
+  lcd.setCursor(0, 1); // (0列, 1行)
+  lcd.print(ip);
 }

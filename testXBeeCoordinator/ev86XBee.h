@@ -575,12 +575,10 @@ protected:
     
     
 public:
-    void begin(Stream &serial);                            // ArduinoとXBee間のSerialを使って初期化
+    void begin(Stream& serial);                            // ArduinoとXBee間のSerialを使って初期化
     void bufFlush();                                       // ホストXBeeの内部受信バッファをフラッシュする
     void setDstAdd64(uint32_t msbAdd, uint32_t lsbAdd);    // 宛先ノード(アドレス)の指定
-    //void hsXBeeInit();                                     // ホストXBeeの初期設定用メソッド
     void hsXBeeStatus();                                   // ホストXBeeの設定確認用メソッド
-    //void rmXBeeInit();                                     // リモートXBeeの初期設定用メソッド
     void rmXBeeStatus();                                   // リモートXBeeの設定確認用メソッド
     int getPacket();                                       // データ受信用の基底メソッド Coordinator flag:0 Router,EndDevice flag:1
     void sendData(String str);                             // データ送信用の基底メソッド

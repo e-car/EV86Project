@@ -18,6 +18,8 @@ EV86XBee::EV86XBee()
 void EV86XBee::begin(Stream &serial) {
   // XBeeオブジェクトにSerial情報を取り次ぐ
   _xbee.begin(serial);
+  // XBee-Arduino間のSerial通信バッファのフラッシュ
+  bufFlush();
 }
 
 void EV86XBee::bufFlush() {
@@ -43,7 +45,7 @@ void EV86XBee::setDstAdd64(uint32_t msbAdd, uint32_t lsbAdd) {
 // データ送信用の基底メソッド
 void EV86XBee::sendData(String str) {
   if (str.length() > 83) {
-    Serial.println("can't send data due to too send data !");
+    Serial.println("Can't send data due to too send data !");
   } else {
     uint8_t reqArray[str.length() + 1]; 
     str.getBytes(reqArray, str.length() + 1);
@@ -61,17 +63,6 @@ String EV86XBee::getData() {
 void EV86XBee::clearData() {
   get_data = "";
 }
-
-//// ホストXBeeの初期化
-//void EV86XBee::hsXBeeInit() {
-//    Serial.println("Init HOST XBee...\n");
-//    delay(1000);
-//    
-//    /*
-//    初期化コマンド
-//    */
-//    Serial.println("-------------------------------------------------");
-//}
 
 // ホストXBeeの設定を確認
 void EV86XBee::hsXBeeStatus() {
@@ -106,23 +97,6 @@ void EV86XBee::hsXBeeStatus() {
     Serial.println("[[[ Finish checking HOST xbee node parameters ]]]");
     Serial.println("------------------------------------------------------");
 }
-
-//// リモートXBeeの設定の初期化
-//void EV86XBee::rmXBeeInit() {
-//  Serial.println("Init REMOTE XBee...");
-//  Serial.print("Address64[0x");
-//    Serial.print(_dstAdd64.getMsb(), HEX);
-//    Serial.print(" 0x");
-//    Serial.print(_dstAdd64.getLsb(), HEX);
-//    Serial.print("]\n");
-//    Serial.println();
-//    delay(1000);
-//     
-//    /*
-//    初期化コマンド
-//    */
-//    Serial.println("-------------------------------------------------");
-//}
 
 // リモートXBeeの設定を確認
 void EV86XBee::rmXBeeStatus() {

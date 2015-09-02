@@ -11,13 +11,14 @@
 #include "rgb_lcd.h"
 
 /* -------------------------------- Wifi Parameters  -------------------------------- */
-char ssid[] = "BUFFALO-4C7A25"; // your network SSID (name), nakayama:506A 304HWa-84F1A0 iPhone_shinichi
-char pass[] = "iebiu6ichxufg"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 11237204a 252554123sin
+char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A 304HWa-84F1A0  BUFFALO-4C7A25
+char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 11237204a  iebiu6ichxufg
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 WiFiServer server(9090); // 9090番ポートを指定
+WiFiClient client;
 int socketTimeCount = 0;
-const int socketTimeOut = 20;
+const int socketTimeOut = 10; //10 20
 boolean connectStatus;
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 
@@ -117,7 +118,7 @@ void setup() {
   lcd.setCursor(0, 0); // (0列, 0行)
   lcd.print("Connecting to");
   lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print("REMOTE XBees...");
+  lcd.print(router.nodeName);
   
   //コネクション確立のためのセッション 
   if (connectProcess(router)) {
@@ -135,6 +136,12 @@ void setup() {
   lcd.print(router.nodeName); 
    
   delay(1000); 
+  
+  lcd.clear();
+  lcd.setCursor(0, 0); // (0列, 0行)
+  lcd.print("Connecting to");
+  lcd.setCursor(0, 1); // (0列, 1行)
+  lcd.print(router2.nodeName);
    
   //コネクション確立のためのセッション
   if (connectProcess(router2)) {
@@ -160,13 +167,15 @@ void setup() {
 void loop() {  
   Serial.println("[[[[[[ loop start ]]]]]]");
   //　サーバー(Edison)として指定したポートにクライアント(Android)からのアクセスがあるか確認。あれば、接続する 
-  WiFiClient client = server.available();
+  client = server.available();
   Serial.print("Client Status : ");
   Serial.println(client);
 
   // クライアント(Android)が存在する場合
   if (client) { 
     Serial.println("New Client");
+    lcd.clear();
+    lcd.print("New Client");
     socketTimeCount = 0;
     // クライアント(Android)とサーバー(Edison)
     // 処理に約5秒かかる
@@ -175,6 +184,12 @@ void loop() {
       Serial.println(socketTimeCount);
       Serial.print("Connect Status : ");
       Serial.println(connectStatus);
+      
+      lcd.clear();
+      lcd.setCursor(0, 0); // (0列, 0行)
+      lcd.print("Connected to");
+      lcd.setCursor(0, 1); // (0列, 1行)
+      lcd.print("WiFi Client");
       
       if (client.available() > 0) {
         socketTimeCount = 0;
@@ -189,7 +204,7 @@ void loop() {
           // センサーデータ取得 from XBee
             Serial.println("Sensor Data by XBee");
             /*****************************************************************/
-            //gettingData(router);
+            gettingData(router);
             Serial.println("*******************************************"); 
             gettingData(router2);  
             /*****************************************************************/
@@ -223,6 +238,13 @@ void loop() {
             client.flush();
             client.stop();
             Serial.println("client disonnected");
+            
+            lcd.clear();
+            lcd.setCursor(0, 0); // (0列, 0行)　
+            lcd.print("Close Socket");
+            lcd.setCursor(0, 1); // (0列, 1行)
+            lcd.print(" by Client Req");
+            delay(1500);
             break;
           
           default:
@@ -230,43 +252,52 @@ void loop() {
             client.println("Error : Request from Client is invalid");
             break;
         }
+        
+        // 接続状態の確認
+        // router firstTrans
+        Serial.print(router.nodeName);
+        Serial.print(" First Connect Status : ");
+        Serial.println(router.firstTrans);
+        // router
+        Serial.print(router.nodeName);
+        Serial.print(" Connect Status : ");
+        Serial.println(router.transmit);
+        
+        // router2 firstTrans
+        Serial.print(router2.nodeName);
+        Serial.print(" First Connect Status : ");
+        Serial.println(router2.firstTrans);
+        // router2
+        Serial.print(router2.nodeName);
+        Serial.print(" Connect Status : ");
+        Serial.println(router2.transmit);
+        Serial.println();
+        Serial.println("-------------------------------------------------");
+        delay(100);
         /***********************************************************************************/
       } else {
         socketTimeCount++;
       }
-    
-      // 接続状態の確認
-      // router firstTrans
-      Serial.print(router.nodeName);
-      Serial.print(" First Connect Status : ");
-      Serial.println(router.firstTrans);
-      // router
-      Serial.print(router.nodeName);
-      Serial.print(" Connect Status : ");
-      Serial.println(router.transmit);
       
-      // router2 firstTrans
-      Serial.print(router2.nodeName);
-      Serial.print(" First Connect Status : ");
-      Serial.println(router2.firstTrans);
-      // router2
-      Serial.print(router2.nodeName);
-      Serial.print(" Connect Status : ");
-      Serial.println(router2.transmit);
-      Serial.println();
-      Serial.println("-------------------------------------------------");
-      delay(100);
-      
-      // 一定時間クライアントから応答がなければ、サーバー側からSocketを切る * client.connected()のバグ対策
-      if (socketTimeCount > socketTimeOut) {
-        Serial.println("Socket TimeOut. close Socket from this server");
-        client.flush();
-        client.stop();
-        break;
-      }
-    }
+       // 一定時間クライアントから応答がなければ、サーバー側からSocketを切る * client.connected()のバグ対策
+       if (socketTimeCount > socketTimeOut) {
+          lcd.clear();
+          lcd.setCursor(0, 0); // (0列, 0行)　
+          lcd.print("Close Socket");
+          lcd.setCursor(0, 1); // (0列, 1行)
+          lcd.print(" from Server");
+          
+          Serial.println("Socket TimeOut. close Socket from this server");
+          client.flush();
+          client.stop();
+       }
+    } // whileの終了点
+  } else {
+    // クライアントからの接続がない場合
+    lcd.clear();
+    lcd.print("No Client");
+    delay(500);
   }
-  delay(500);
 }
 
 

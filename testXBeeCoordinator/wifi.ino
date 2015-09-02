@@ -23,9 +23,9 @@ int setWiFi() {
   
   lcd.clear();
   lcd.setCursor(0, 0); // (0列, 0行)
-  lcd.print("Try to connect");
+  lcd.print("Trying to ");
   lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print("to WiFi");
+  lcd.print("connect to WiFi");
   delay(1500);
   
   lcd.clear();
@@ -33,37 +33,31 @@ int setWiFi() {
   lcd.print("SSID:");
   lcd.print(ssid);
   lcd.setCursor(0, 1); // (0列, 1行)
-  int lcCursor = 0;
   int timeOutCount_WiFi = 0;
   // attempt to connect to WiFi network:
   while(status != WL_CONNECTED) {
     Serial.print("Attempting to connect to SSID : ");
     Serial.println(ssid);
-    
-    if (lcCursor > 15) {
-      lcd.clear();
-      lcd.setCursor(0, 0); // (0列, 0行)
-      lcd.print("SSID:");
-      lcd.print(ssid);
-      lcd.setCursor(0, 1); // (0列, 1行)
-      lcCursor = 0;
-    }
-     
-    lcd.setCursor(lcCursor, 1);
-    lcd.print("#");  
       
     // connect to WPA/WPA2 network. change this line if using open or WEP network;
     status = WiFi.begin(ssid, pass);
     // wait 5 seconds for connection
     delay(5000);
     
-    if(timeOutCount_WiFi > 20) {
+    lcd.setCursor(timeOutCount_WiFi, 1);
+    lcd.print("#");
+    
+    if(timeOutCount_WiFi > 15) {
       Serial.println("Couldn't connect to WiFi network. Please try again to implement your Application Progaram");
+      lcd.clear();
+      lcd.setCursor(0, 0); // (0列, 0行)
+      lcd.print("No connect WiFi");
+      lcd.setCursor(0, 1); // (0列, 1行)
+      lcd.print("Restart Arduino"); 
       while(true); // !!!!!!!!!!!!!
     }
-    timeOutCount_WiFi++;
-    lcCursor++;
     
+    timeOutCount_WiFi++;
   }
   timeOutCount_WiFi = 0;
   Serial.println("WiFi Connection OK");

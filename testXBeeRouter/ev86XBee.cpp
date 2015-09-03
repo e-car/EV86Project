@@ -18,6 +18,7 @@ EV86XBee::EV86XBee()
 void EV86XBee::begin(Stream &serial) {
   // XBeeオブジェクトにSerial情報を取り次ぐ
   _xbee.begin(serial);
+  bufFlush();
 }
 
 void EV86XBee::bufFlush() {

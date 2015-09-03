@@ -11,14 +11,14 @@
 #include "rgb_lcd.h"
 
 /* -------------------------------- Wifi Parameters  -------------------------------- */
-char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A 304HWa-84F1A0  BUFFALO-4C7A25
-char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 11237204a  iebiu6ichxufg
+char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A 304HWa-84F1A0  BUFFALO-4C7A25  jkoba-lab-ap3
+char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 11237204a  iebiu6ichxufg  7747jkoba7727
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 WiFiServer server(9090); // 9090番ポートを指定
 WiFiClient client;
 int socketTimeCount = 0;
-const int socketTimeOut = 10; //10 20
+const int socketTimeOut = 20; //10 20
 boolean connectStatus;
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 
@@ -35,8 +35,8 @@ typedef struct {
 } XBeeNode;
 
 // ルーター情報の設定
-XBeeNode router = { 0x0013A200, 0x40993791, "rmXBee_EDISON", "startAck1", "None", 50, false, false };
-XBeeNode router2 = { 0x0013A200, 0x40707DF7, "rmXBee_MEGA", "startAck2", "None", 50, false, false };
+XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 50, false, false };
+XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 50, false, false };
 
 // コーディネーター用のインスタンスを生成
 EV86XBeeC coor = EV86XBeeC();
@@ -46,6 +46,7 @@ EV86 ev86 = EV86();
 
 // LCD液晶ディスプレイインスタンスを生成
 rgb_lcd lcd;
+int clientCheckCount = 0;
 
 // プロトタイプ宣言
 boolean connectProcess(XBeeNode& router);
@@ -94,13 +95,13 @@ void setup() {
   delay(1000);
   
   // リモートXBeeのアドレス指定と設定情報の取得
-  coor.setDstAdd64(router.h64Add, router.l64Add);
+  coor.setDstAdd64(router1.h64Add, router1.l64Add);
   coor.rmXBeeStatus();
   lcd.clear();
   lcd.setCursor(0, 0); // (0列, 0行)　 
   lcd.print("Checked STATUS");
   lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router.nodeName);
+  lcd.print(router1.nodeName);
   delay(1000);
   
   // リモートXBeeのアドレス指定と設定情報の取得
@@ -113,27 +114,27 @@ void setup() {
   lcd.print(router2.nodeName);
   delay(2000);
   
-  
+  // LCDにXBeeコネクション状況を知らせる
   lcd.clear();
   lcd.setCursor(0, 0); // (0列, 0行)
   lcd.print("Connecting to");
   lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router.nodeName);
+  lcd.print(router1.nodeName);
   
   //コネクション確立のためのセッション 
-  if (connectProcess(router)) {
-    router.transmit = true;
+  if (connectProcess(router1)) {
+    router1.firstTrans = true;
     lcd.clear();
     lcd.setCursor(0, 0); // (0列, 0行)　 
     lcd.print("Connected to");
   } else {
-    router.transmit = false;
+    router1.firstTrans = false;
     lcd.clear();
     lcd.setCursor(0, 0); // (0列, 0行)　 
     lcd.print("Disconnected to");
   }
   lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router.nodeName); 
+  lcd.print(router1.nodeName); 
    
   delay(1000); 
   
@@ -145,12 +146,12 @@ void setup() {
    
   //コネクション確立のためのセッション
   if (connectProcess(router2)) {
-    router2.transmit = true;
+    router2.firstTrans = true;
     lcd.clear();
     lcd.setCursor(0, 0); // (0列, 0行)　 
     lcd.print("Connected to");
   } else {
-    router2.transmit = false;
+    router2.firstTrans = false;
     lcd.clear();
     lcd.setCursor(0, 0); // (0列, 0行)　 
     lcd.print("Disconnected to");
@@ -162,6 +163,7 @@ void setup() {
   // set WiFi
   setWiFi();
   delay(3000);
+  lcd.clear();
 }
 
 void loop() {  
@@ -204,15 +206,15 @@ void loop() {
           // センサーデータ取得 from XBee
             Serial.println("Sensor Data by XBee");
             /*****************************************************************/
-            gettingData(router);
+            gettingData(router1);
             Serial.println("*******************************************"); 
             gettingData(router2);  
             /*****************************************************************/
             
             // send router1 data to client by wifi
-            if (router.firstTrans && router.transmit) {
-              Serial.println(router.sensorData);
-              client.println(router.sensorData);
+            if (router1.firstTrans && router1.transmit) {
+              Serial.println(router1.sensorData);
+              client.println(router1.sensorData);
             } else {
               Serial.println("Couldn't get router.sensorData");
               client.println("Couldn't get router.sensorData");
@@ -244,7 +246,9 @@ void loop() {
             lcd.print("Close Socket");
             lcd.setCursor(0, 1); // (0列, 1行)
             lcd.print(" by Client Req");
-            delay(1500);
+            delay(2000);
+            lcd.clear();
+            clientCheckCount = 0;
             break;
           
           default:
@@ -255,13 +259,13 @@ void loop() {
         
         // 接続状態の確認
         // router firstTrans
-        Serial.print(router.nodeName);
+        Serial.print(router1.nodeName);
         Serial.print(" First Connect Status : ");
-        Serial.println(router.firstTrans);
+        Serial.println(router1.firstTrans);
         // router
-        Serial.print(router.nodeName);
+        Serial.print(router1.nodeName);
         Serial.print(" Connect Status : ");
-        Serial.println(router.transmit);
+        Serial.println(router1.transmit);
         
         // router2 firstTrans
         Serial.print(router2.nodeName);
@@ -286,6 +290,9 @@ void loop() {
           lcd.print("Close Socket");
           lcd.setCursor(0, 1); // (0列, 1行)
           lcd.print(" from Server");
+          delay(2000);
+          lcd.clear();
+          clientCheckCount = 0;
           
           Serial.println("Socket TimeOut. close Socket from this server");
           client.flush();
@@ -293,10 +300,19 @@ void loop() {
        }
     } // whileの終了点
   } else {
+    
+    if (clientCheckCount > 15) {
+      lcd.clear();
+      clientCheckCount = 0;
+    }
+    
     // クライアントからの接続がない場合
-    lcd.clear();
+    lcd.setCursor(0, 0); // (0列, 0行)
     lcd.print("No Client");
-    delay(500);
+    lcd.setCursor(clientCheckCount, 1); // (0列, 1行)
+    lcd.print("#");
+    clientCheckCount++;
+    delay(850);
   }
 }
 

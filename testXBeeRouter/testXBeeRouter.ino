@@ -11,6 +11,9 @@
 #define MEGA
 //#define EDISON
 
+#define ROUTER1
+//#define ROUTER2
+
 // ヘッダーのインクルード
 #ifdef MEGA
 #include <SoftwareSerial.h>
@@ -34,19 +37,21 @@ typedef struct {
 } XBeeNode;
 
 // Coordinator情報の初期化
-XBeeNode coor = { 0x0013A200, 0x40B77090, "Coordinator", "startReq", "startAck", false };  
+XBeeNode coor = { 0x0013A200, 0x40E756D1, "Coordinator", "startReq", "startAck", false };  
 
 // XBeeをRouterとして起動
 EV86XBeeR router = EV86XBeeR();
 
 String request = "request";    // コールバック用変数
 
-#ifdef MEGA
+#ifdef ROUTER1
 String startAck = "startAck1"; // コネクション許可応答
-String senData = "MEGAsensor"; // センサー値(仮)
-#else
+String senData = "ROUTER1sensor"; // センサー値(仮)
+#endif
+
+#ifdef ROUTER2
 String startAck = "startAck2"; // コネクション許可応答
-String senData = "EDISONsensor"; // センサー値(仮)
+String senData = "ROUTER2sensor"; // センサー値(仮)
 #endif
 
 void setup() {
@@ -63,10 +68,6 @@ void setup() {
   router.begin(Serial1);
 #endif
   delay(5000); 
-  
-  // ホストXBeeの内部受信バッファをフラッシュする
-  router.bufFlush();                         
-  delay(1000);
   
   // ホストXBeeの設定確認用メソッド
   router.hsXBeeStatus();                     

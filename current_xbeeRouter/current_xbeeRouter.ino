@@ -50,10 +50,8 @@ XBeeNode coor = { 0x0013A200, 0x40B77090, "Coordinator", "startReq", "startAck" 
 // XBeeをRouterとして起動
 EV86XBeeR router = EV86XBeeR();
 
-
 // 電流センサ用変数
-int analogPin = 0;     // ポテンショメータのワイプ(中央の端子)に
-                       // 両端はグランドと+5Vに接続
+int analogPin = 0;     // ポテンショメータのワイプ(中央の端子)に両端はグランドと+5Vに接続
 float val = 0;           // 読み取った値を格納する変数
 float amplitude = 0;
 float amp_buf = 0;

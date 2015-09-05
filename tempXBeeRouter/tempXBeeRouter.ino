@@ -120,8 +120,12 @@ void setup(){
 
 void loop(){
   Serial.println("-----------------------------");
-  // 受信データの初期化
-  router.clearData();
+  
+  // センサデータの取得・送信用データの作成
+  /************************************************/
+  
+  // 温度センサの値を読む
+  Serial.println("[Sensor_data]");
   
   // 温度取得
   tmp(SLAVE1);
@@ -129,6 +133,13 @@ void loop(){
   
   // 送信用データに変換 (Temp1のみ)
   senData = float2String(disp);
+  
+  
+  // XBeeデータ受信
+  /************************************************/
+  
+  // 受信データの初期化
+  router.clearData();
   
   // 受信パケットの確認
   Serial.println("[get Packet]");

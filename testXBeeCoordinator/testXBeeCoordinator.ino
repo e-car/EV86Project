@@ -19,7 +19,7 @@ int status = WL_IDLE_STATUS;
 WiFiServer server(9090); // 9090番ポートを指定
 WiFiClient client;
 int socketTimeCount = 0;
-const int socketTimeOut = 10; //10 20
+const int socketTimeOut = 20; //10 20
 boolean connectStatus;
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 
@@ -250,7 +250,7 @@ void loop() {
         // クライアントからのリクエストの受け取りとその処理
         /***********************************************************************************/
         switch(revChar) {  
-          case 'G':
+          case 'g':
           // センサーデータ取得 from XBee
             Serial.println("Sensor Data by XBee");
             /*****************************************************************/
@@ -289,12 +289,12 @@ void loop() {
             }
             break;
           
-          case 'T':
+          case 't':
             Serial.println("test EV86 car data");
             client.println("test EV86 car data");
             break;
             
-          case 'S':
+          case 's':
             // close the connection:
             Serial.println("Stop Signal & Close Socket");
             client.flush();
@@ -363,7 +363,7 @@ void loop() {
           lcd.print(" from Server");
           delay(2000);
           lcd.clear();
-          clientCheckCount = 0;
+          socketTimeCount = 0;
           
           Serial.println("Socket TimeOut. close Socket from this server");
           client.flush();

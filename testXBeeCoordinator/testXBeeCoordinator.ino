@@ -36,9 +36,9 @@ typedef struct {
 } XBeeNode;
 
 // ルーター情報の設定
-XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 50, false, false };
-XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 50, false, false };
-XBeeNode router3 = { 0x0013A200, 0x40993791, "RMXBee_ROUTER3", "startAck3", "None", 50, false, false };
+XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 100, false, false };
+XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 100, false, false };
+XBeeNode router3 = { 0x0013A200, 0x40993791, "RMXBee_ROUTER3", "startAck3", "None", 100, false, false };
 
 // コーディネーター用のインスタンスを生成
 EV86XBeeC coor = EV86XBeeC();
@@ -121,7 +121,7 @@ void setup() {
   delay(2000);
   
   // リモートXBeeのアドレス指定と設定情報の取得
-  coor.setDstAdd64(router3.h64Add, router2.l64Add);
+  coor.setDstAdd64(router3.h64Add, router3.l64Add);
   coor.rmXBeeStatus();
   lcd.clear();
   lcd.setCursor(0, 0); // (0列, 0行)　 
@@ -269,6 +269,7 @@ void loop() {
               Serial.println("Couldn't get router.sensorData");
               client.println("Couldn't get router.sensorData");
             }
+            
             // send router2 data to client by wifi
             if (router2.firstTrans && router2.transmit) {
               Serial.println(router2.sensorData);
@@ -277,9 +278,8 @@ void loop() {
               Serial.println("Couldn't get router2.sensorData");
               client.println("Couldn't get router2.sensorData");
             }
-            break;
             
-            // send router2 data to client by wifi
+            // send router3 data to client by wifi
             if (router3.firstTrans && router3.transmit) {
               Serial.println(router3.sensorData);
               client.println(router3.sensorData);
@@ -340,7 +340,7 @@ void loop() {
         // router3 firstTrans
         Serial.print(router3.nodeName);
         Serial.print(" First Connect Status : ");
-        Serial.println(router2.firstTrans);
+        Serial.println(router3.firstTrans);
         // router3
         Serial.print(router3.nodeName);
         Serial.print(" Connect Status : ");

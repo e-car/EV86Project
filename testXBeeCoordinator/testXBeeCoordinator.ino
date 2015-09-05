@@ -87,6 +87,10 @@ void setup() {
   lcd.print("XBees..."); 
   delay(500); 
     
+    
+  // HOST, REMOTE XBeeの設定を確認  
+  /***********************************************************************************/  
+    
   // ホストXBeeの設定確認
   coor.hsXBeeStatus();
   lcd.clear();
@@ -123,8 +127,12 @@ void setup() {
   lcd.setCursor(0, 0); // (0列, 0行)　 
   lcd.print("Checked STATUS");
   lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router2.nodeName);
+  lcd.print(router3.nodeName);
   delay(2000);
+  
+  
+  // REMOTE XBeeとのコネクションを張る
+  /***********************************************************************************/  
   
   // LCDにXBeeコネクション状況を知らせる
   lcd.clear();
@@ -177,25 +185,27 @@ void setup() {
   lcd.setCursor(0, 0); // (0列, 0行)
   lcd.print("Connecting to");
   lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router2.nodeName);
+  lcd.print(router3.nodeName);
    
   //コネクション確立のためのセッション
-  if (connectProcess(router2)) {
-    router2.firstTrans = true;
+  if (connectProcess(router3)) {
+    router3.firstTrans = true;
     lcd.clear();
     lcd.setCursor(0, 0); // (0列, 0行)　 
     lcd.print("Connected to");
   } else {
-    router2.firstTrans = false;
+    router3.firstTrans = false;
     lcd.clear();
     lcd.setCursor(0, 0); // (0列, 0行)　 
     lcd.print("Disconnected to");
   }
   lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router2.nodeName);
+  lcd.print(router3.nodeName);
   
-  
-  // set WiFi
+
+
+   // WiFi環境の構築　別途、WiFi.inoプログラムを参照するように
+  /***********************************************************************************/
   setWiFi();
   delay(3000);
   lcd.clear();
@@ -326,6 +336,17 @@ void loop() {
         Serial.print(" Connect Status : ");
         Serial.println(router2.transmit);
         Serial.println();
+        
+        // router3 firstTrans
+        Serial.print(router3.nodeName);
+        Serial.print(" First Connect Status : ");
+        Serial.println(router2.firstTrans);
+        // router3
+        Serial.print(router3.nodeName);
+        Serial.print(" Connect Status : ");
+        Serial.println(router3.transmit);
+        Serial.println();
+        
         Serial.println("-------------------------------------------------");
         delay(100);
         /***********************************************************************************/

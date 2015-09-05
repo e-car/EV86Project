@@ -17,6 +17,10 @@
 #define MEGA
 //#define EDISON
 
+#define ROUTER1
+//#define ROUTER2
+//#define ROUTER3
+
 // ヘッダーのインクルード
 #ifdef MEGA
 #include <SoftwareSerial.h>
@@ -30,10 +34,6 @@ int tx = 11;
 SoftwareSerial myserial = SoftwareSerial(rx, tx);
 #endif
 
-String request = "request";    // コールバック用変数
-String startAck = "startAck2";      // コネクション許可応答
-String senData = "Water Temp"; // センサー値(仮)
-
 // Coordinatorの情報
 typedef struct {
   uint32_t h64Add;
@@ -45,10 +45,32 @@ typedef struct {
 } XBeeNode;
 
 // Coordinator情報の初期化
-XBeeNode coor = { 0x0013A200, 0x40B77090, "Coordinator", "startReq", "startAck" };  
+XBeeNode coor = { 0x0013A200, 0x40E756D1, "Coordinator", "startReq", "startAck" };  
 
 // XBeeをRouterとして起動
 EV86XBeeR router = EV86XBeeR();
+
+// プロトタイプ宣言
+String float2String(float value);
+
+
+String request = "request";    // コールバック用変数
+
+#ifdef ROUTER1
+String startAck = "startAck1"; // コネクション許可応答
+String senData = "ROUTER1sensor"; // センサー値(仮)
+#endif
+
+#ifdef ROUTER2
+String startAck = "startAck2"; // コネクション許可応答
+String senData = "ROUTER2sensor"; // センサー値(仮)
+#endif
+
+#ifdef ROUTER3
+String startAck = "startAck3"; 
+String senData ="ROUTER3sensor";
+#endif
+
 
 // 電流センサ用変数
 int analogPin = 0;     // ポテンショメータのワイプ(中央の端子)に両端はグランドと+5Vに接続
@@ -58,6 +80,7 @@ float amp_buf = 0;
 int threshold = 512;   // 閾値
 
 void setup() {
+  
   Serial.begin(9600);                          // Arduino-PC間の通信
 #ifdef MEGA
   myserial.begin(9600);
@@ -88,11 +111,14 @@ void setup() {
 }
 
 void loop() {
-  // センサデータの取得・送信用データの作成
   Serial.println("-----------------------------");
+  
+  // センサデータの取得・送信用データの作成
+  /************************************************/
   
   // 電流センサの値を読む
   Serial.println("[Sensor_data]");
+  
   // 3回計測してその平均を返す
   val = 0.0;
   for(int i=0;i<3;i++){
@@ -110,6 +136,10 @@ void loop() {
   Serial.println(amplitude);            // デバッグ用に送信
   senData = float2String(amplitude);   // 値を文字列に変換
   
+  
+  // XBeeデータ受信
+  /************************************************/
+  
   // 受信データの初期化
   router.clearData();
   
@@ -121,9 +151,10 @@ void loop() {
    
   // 受信データが接続要求だった場合 
   if (router.checkData(coor.startReq)) {
-   Serial.println("get startReq");
+   Serial.println("get [startReq]");
    
    // 接続応答を送信
+   Serial.println("send startAck");
    router.sendData(startAck);
    
    // 送信状態のチェック
@@ -153,6 +184,7 @@ void loop() {
     Serial.println("Not send");
   }
   
+  // 受信データの初期化
   delay(300); 
 }
 

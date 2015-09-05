@@ -11,14 +11,15 @@
 #include "rgb_lcd.h"
 
 /* -------------------------------- Wifi Parameters  -------------------------------- */
-char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A 304HWa-84F1A0  BUFFALO-4C7A25  jkoba-lab-ap3
-char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 11237204a  iebiu6ichxufg  7747jkoba7727
+IPAddress ip;
+char ssid[] = "304HWa-84F1A0"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25  jkoba-lab-ap3　iPhone_shinichi
+char pass[] = "11237204a"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg  7747jkoba7727　252554123sin
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 WiFiServer server(9090); // 9090番ポートを指定
 WiFiClient client;
 int socketTimeCount = 0;
-const int socketTimeOut = 20; //10 20
+const int socketTimeOut = 10; //10 20
 boolean connectStatus;
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 
@@ -37,6 +38,7 @@ typedef struct {
 // ルーター情報の設定
 XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 50, false, false };
 XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 50, false, false };
+XBeeNode router3 = { 0x0013A200, 0x40993791, "RMXBee_ROUTER3", "startAck3", "None", 50, false, false };
 
 // コーディネーター用のインスタンスを生成
 EV86XBeeC coor = EV86XBeeC();
@@ -114,6 +116,16 @@ void setup() {
   lcd.print(router2.nodeName);
   delay(2000);
   
+  // リモートXBeeのアドレス指定と設定情報の取得
+  coor.setDstAdd64(router3.h64Add, router2.l64Add);
+  coor.rmXBeeStatus();
+  lcd.clear();
+  lcd.setCursor(0, 0); // (0列, 0行)　 
+  lcd.print("Checked STATUS");
+  lcd.setCursor(0, 1); // (0列, 1行)
+  lcd.print(router2.nodeName);
+  delay(2000);
+  
   // LCDにXBeeコネクション状況を知らせる
   lcd.clear();
   lcd.setCursor(0, 0); // (0列, 0行)
@@ -159,6 +171,29 @@ void setup() {
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router2.nodeName);
   
+  delay(1000);
+  
+  lcd.clear();
+  lcd.setCursor(0, 0); // (0列, 0行)
+  lcd.print("Connecting to");
+  lcd.setCursor(0, 1); // (0列, 1行)
+  lcd.print(router2.nodeName);
+   
+  //コネクション確立のためのセッション
+  if (connectProcess(router2)) {
+    router2.firstTrans = true;
+    lcd.clear();
+    lcd.setCursor(0, 0); // (0列, 0行)　 
+    lcd.print("Connected to");
+  } else {
+    router2.firstTrans = false;
+    lcd.clear();
+    lcd.setCursor(0, 0); // (0列, 0行)　 
+    lcd.print("Disconnected to");
+  }
+  lcd.setCursor(0, 1); // (0列, 1行)
+  lcd.print(router2.nodeName);
+  
   
   // set WiFi
   setWiFi();
@@ -168,6 +203,9 @@ void setup() {
 
 void loop() {  
   Serial.println("[[[[[[ loop start ]]]]]]");
+  Serial.print("Local IP : ");
+  Serial.println(ip);
+  
   //　サーバー(Edison)として指定したポートにクライアント(Android)からのアクセスがあるか確認。あれば、接続する 
   client = server.available();
   Serial.print("Client Status : ");
@@ -209,6 +247,8 @@ void loop() {
             gettingData(router1);
             Serial.println("*******************************************"); 
             gettingData(router2);  
+            Serial.println("*******************************************"); 
+            gettingData(router3);
             /*****************************************************************/
             
             // send router1 data to client by wifi
@@ -226,6 +266,16 @@ void loop() {
             } else {
               Serial.println("Couldn't get router2.sensorData");
               client.println("Couldn't get router2.sensorData");
+            }
+            break;
+            
+            // send router2 data to client by wifi
+            if (router3.firstTrans && router3.transmit) {
+              Serial.println(router3.sensorData);
+              client.println(router3.sensorData);
+            } else {
+              Serial.println("Couldn't get router3.sensorData");
+              client.println("Couldn't get router3.sensorData");
             }
             break;
           

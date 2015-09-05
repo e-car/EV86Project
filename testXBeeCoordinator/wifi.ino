@@ -77,7 +77,7 @@ void printWifiStatus() {
   Serial.println(WiFi.SSID());
   
   // print your WiFi IP address
-  IPAddress ip = WiFi.localIP();
+  ip = WiFi.localIP();
   Serial.print("IP Address: ");
   Serial.println(ip);
   

@@ -43,7 +43,6 @@ XBeeNode coor = { 0x0013A200, 0x40E756D1, "Coordinator", "startReq", "startAck",
 // XBeeをRouterとして起動
 EV86XBeeR router = EV86XBeeR();
 
-
 // プロトタイプ宣言
 String float2String(float value);
 
@@ -101,9 +100,10 @@ void setup() {
 
 void loop() {
   Serial.println("-----------------------------");
-  // 受信データの初期化
-  router.clearData();
   
+  // センサデータの取得・送信用データの作成
+  /************************************************/
+ 
   //温度センサ読み取り処理
   n1 = analogRead(1);
   n2 = analogRead(2);
@@ -130,7 +130,12 @@ void loop() {
   // 送信用データに変換
   senData = float2String(temp1);
   
-  delay(1000);
+  
+  // XBeeデータ受信
+  /************************************************/
+  
+  // 受信データの初期化
+  router.clearData();
   
   // 受信パケットの確認
   Serial.println("[get Packet]");

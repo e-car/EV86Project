@@ -43,21 +43,16 @@ XBeeNode coor = { 0x0013A200, 0x40E756D1, "Coordinator", "startReq", "startAck",
 // XBeeをRouterとして起動
 EV86XBeeR router = EV86XBeeR();
 
-// プロトタイプ宣言
-String float2String(float value);
-
+// コネクション用パラメータ
 String request = "request";    // コールバック用変数
-
 #ifdef ROUTER1
 String startAck = "startAck1"; // コネクション許可応答
 String senData = "ROUTER1sensor"; // センサー値(仮)
 #endif
-
 #ifdef ROUTER2
 String startAck = "startAck2"; // コネクション許可応答
 String senData = "ROUTER2sensor"; // センサー値(仮)
 #endif
-
 #ifdef ROUTER3
 String startAck = "startAck3"; 
 String senData ="ROUTER3sensor";
@@ -71,6 +66,9 @@ float R1 = 10.0;
 int n1,n2;
 float rr1,rr2,t1,t2,temp1,temp2;
 
+// プロトタイプ宣言
+String float2String(float value);
+String getWaterTemp();
 
 void setup() {
   Serial.begin(9600);                          // Arduino-PC間の通信
@@ -103,37 +101,10 @@ void loop() {
   
   // センサデータの取得・送信用データの作成
   /************************************************/
- 
-  //温度センサ読み取り処理
-  n1 = analogRead(1);
-  n2 = analogRead(2);
-  
-  rr1 = R1 * n1 / (1024.0 - n1);
-  rr2 = R1 * n2 / (1024.0 - n2);
-  
-  t1 = 1 / (log(rr1 / R0) / B + (1 / T0));
-  t2 = 1 / (log(rr2 / R0) / B + (1 / T0));
-  
-  temp1 = t1 - 273.15;
-  temp2 = t2 - 273.15;
-  
-  Serial.print("rr1:");
-  Serial.print(rr1);
-  Serial.print(" Temp1:");
-  Serial.println(temp1);
-  
-  Serial.print("rr2:");
-  Serial.print(rr2);
-  Serial.print(" Temp2:");
-  Serial.println(temp2);
-  
-  // 送信用データに変換
-  senData = float2String(temp1);
-  
+  senData = getWaterTemp();
   
   // XBeeデータ受信
   /************************************************/
-  
   // 受信データの初期化
   router.clearData();
   
@@ -187,12 +158,4 @@ void loop() {
   delay(300);
 }
 
-// 変換 [float->string] 
-String float2String(float value) {
-  String result;
-  result = (String)((int)value);
-  result += ".";
-  value -= (int)value;
-  result += (int)(value * 10);
-  return result;
-}
+

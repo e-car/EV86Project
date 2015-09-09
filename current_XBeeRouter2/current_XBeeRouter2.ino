@@ -13,6 +13,7 @@
 
 #define ROUTER1
 //#define ROUTER2
+//#define ROUTER3
 
 // ヘッダーのインクルード
 #ifdef MEGA
@@ -23,7 +24,7 @@
 #ifdef MEGA
 int rx = 10;
 int tx = 11;
-SoftwareSerial myserial = SoftwareSerial(rx, tx);
+SoftwareSerial mySerial = SoftwareSerial(rx, tx);
 #endif
 
 // Coordinatorの情報
@@ -42,16 +43,12 @@ XBeeNode coor = { 0x0013A200, 0x40E756D1, "Coordinator", "startReq", "startAck",
 // XBeeをRouterとして起動
 EV86XBeeR router = EV86XBeeR();
 
-// プロトタイプ宣言
-String float2String(float value);
-
+// コネクション用パラメータ
 String request = "request";    // コールバック用変数
-
 #ifdef ROUTER1
 String startAck = "startAck1"; // コネクション許可応答
 String senData = "ROUTER1sensor"; // センサー値(仮)
 #endif
-
 #ifdef ROUTER2
 String startAck = "startAck2"; // コネクション許可応答
 String senData = "ROUTER2sensor"; // センサー値(仮)
@@ -65,16 +62,18 @@ float amp_buf = 0;
 int threshold = 512;   // 閾値
 
 void setup() {
-  Serial.begin(9600);                          // Arduino-PC間の通信
+  // Arduino-PC間の通信
+  Serial.begin(9600);                          
 #ifdef MEGA
-  myserial.begin(9600);
-  myserial.flush();
-  router.begin(myserial);
+  // Arduino-XBee間の通信
+  mySerial.begin(9600);
+  // mySerialをXBeeに設定する
+  router.begin(mySerial);
 #endif
-
 #ifdef EDISON
+  // Arduino-XBee間の通信
   Serial1.begin(9600);                         // Arduino-XBee間の通信
-  Serial1.flush();
+  // Serial1をXBeeに設定する
   router.begin(Serial1);
 #endif
   delay(5000); 
@@ -95,31 +94,10 @@ void loop() {
   
   // センサデータの取得・送信用データの作成
   /************************************************/
-  
-  // 電流センサの値を読む
-  Serial.println("[Sensor_data]");
-  
-  // 3回計測してその平均を返す
-  val = 0.0;
-  for(int i=0;i<3;i++){
-    val += (float)analogRead(analogPin);    // アナログピンを読み取る
-    delay(10);
-  }
-  val = val / 3;
-  if((val < 511+3) && (val > 511-3))
-    val = 511;
-//  amplitude = (val - 511.0)*(300.0/1024);
-  amplitude = (val - 511) * (300.0 / 511);
-  Serial.print("ad_data:");
-  Serial.println(val);
-  Serial.print("data : ");
-  Serial.println(amplitude);            // デバッグ用に送信
-  senData = float2String(amplitude);   // 値を文字列に変換
-  
+  senData = getCurrent();
   
   // XBeeデータ受信
   /************************************************/
-  
   // 受信データの初期化
   router.clearData();
   
@@ -173,12 +151,4 @@ void loop() {
   delay(300);
 }
 
-// 変換 [float->string] 
-String float2String(float value) {
-  String result;
-  result = (String)((int)value);
-  result += ".";
-  value -= (int)value;
-  result += (int)(value * 10);
-  return result;
-}
+

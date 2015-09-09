@@ -12,8 +12,8 @@
 
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 IPAddress ip;
-char ssid[] = "304HWa-84F1A0"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25  jkoba-lab-ap3　iPhone_shinichi
-char pass[] = "11237204a"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg  7747jkoba7727　252554123sin
+char ssid[] = "304HWa-84F1A0"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25　iPhone_shinichi
+char pass[] = "11237204a"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg 　252554123sin
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 WiFiServer server(9090); // 9090番ポートを指定

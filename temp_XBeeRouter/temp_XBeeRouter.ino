@@ -1,8 +1,4 @@
-//       uno  mega
-//digital 10   53  :SS
-//digital 11   51  :MOSI
-//digital 12   50  :MISO
-//digital 13   52  :SCK
+
 
 #define MEGA
 //#define EDISON
@@ -17,7 +13,6 @@
 #endif
 #include "ev86XBee.h"   
 #include <SPI.h>
-
 
 #ifdef MEGA
 int rx = 10;
@@ -41,28 +36,20 @@ XBeeNode coor = { 0x0013A200, 0x40E756D1, "Coordinator", "startReq", "startAck",
 // XBeeをRouterとして起動
 EV86XBeeR router = EV86XBeeR();
 
-
-// プロトタイプ宣言
-void tmp(int x);
-String float2String(float value);
-
+// コネクション用のパラメータ
 String request = "request";    // コールバック用変数
-
 #ifdef ROUTER1
 String startAck = "startAck1"; // コネクション許可応答
 String senData = "ROUTER1sensor"; // センサー値(仮)
 #endif
-
 #ifdef ROUTER2
 String startAck = "startAck2"; // コネクション許可応答
 String senData = "ROUTER2sensor"; // センサー値(仮)
 #endif
-
 #ifdef ROUTER3
 String startAck = "startAck3"; 
 String senData ="ROUTER3sensor";
 #endif
-
 
 // SPI & 熱電対式温度センサーパラメータ
 #define SLAVE1 53   //uno 10 mega 53
@@ -74,9 +61,11 @@ float disp, disp2;                 // display value
 char s[10], s2[10]; // 時間
 char c[10], c2[10];// 温度
 
+// プロトタイプ宣言
+String float2String(float value);
+String getTemp(int x);
 
-void setup(){
-  
+void setup(){  
   // SPI用ピン設定
   pinMode(SLAVE1, OUTPUT);
   digitalWrite(SLAVE1, HIGH);
@@ -89,19 +78,18 @@ void setup(){
   SPI.setClockDivider(SPI_CLOCK_DIV4);
   SPI.setDataMode(SPI_MODE0);
   
-  // PC−Arduino間Serial
+  // PC−Arduino間
   Serial.begin(9600);
   
   // Arduino-XBee間Serial
 #ifdef MEGA
+  // Arduino-XBee間の通信
   myserial.begin(9600);
-  myserial.flush();
   router.begin(myserial);
 #endif
-
 #ifdef EDISON
-  Serial1.begin(9600);                         // Arduino-XBee間の通信
-  Serial1.flush();
+  // Arduino-XBee間の通信
+  Serial1.begin(9600);                         
   router.begin(Serial1);
 #endif
   delay(5000);
@@ -122,22 +110,13 @@ void loop(){
   Serial.println("-----------------------------");
   
   // センサデータの取得・送信用データの作成
-  /************************************************/
-  
-  // 温度センサの値を読む
-  Serial.println("[Sensor_data]");
-  
-  // 温度取得
-  tmp(SLAVE1);
-  tmp(SLAVE2);
-  
+  /***********************************************/
   // 送信用データに変換 (Temp1のみ)
-  senData = float2String(disp);
-  
+  senData = getTemp(SLAVE1);
+  // senData = getTemp(SLAVE2);
   
   // XBeeデータ受信
   /************************************************/
-  
   // 受信データの初期化
   router.clearData();
   
@@ -191,72 +170,4 @@ void loop(){
   delay(300);
 }
 
-// 熱電対式温度センサ取得関数
-void tmp(int x){
-  digitalWrite(x,LOW);                                      //  Enable the chip
-  thermocouple  = (unsigned int)SPI.transfer(0x00) << 8;   //  Read high byte thermocouple
-  thermocouple |= (unsigned int)SPI.transfer(0x00);        //  Read low byte thermocouple 
-  internal  = (unsigned int)SPI.transfer(0x00) << 8;       //  Read high byte internal
-  internal |= (unsigned int)SPI.transfer(0x00);            //  Read low byte internal 
-  digitalWrite(x, HIGH);                                   //  Disable the chip
-  
-  if((thermocouple & 0x0001) != 0) {
-    Serial.print("ERROR: ");
-    if ((internal & 0x0004) !=0)  Serial.print("Short to Vcc, ");
-    if ((internal & 0x0002) !=0)  Serial.print("Short to GND, ");
-    if ((internal & 0x0001) !=0)  Serial.print("Open Circuit, ");
-    Serial.println();
-  }
-  else {
-    if((thermocouple & 0x8000) == 0){ // 0℃以上   above 0 Degrees Celsius 
-      
-      if (x == SLAVE1) {
-        disp = (thermocouple >> 2) * 0.25;
-      } else if (x == SLAVE2) {
-         disp2 = (thermocouple >> 2) * 0.25;
-      }
-      
-    }
-    else {                            // 0℃未満   below zero
-      if (x == SLAVE1) {
-        disp = (0x3fff - (thermocouple >> 2) + 1)  * -0.25;
-      } else if (x == SLAVE2) {
-        disp2 = (0x3fff - (thermocouple >> 2) + 1)  * -0.25;
-      }
-      
-    }
-    
-    if (x == SLAVE1) {
-      tempTime = millis();
-      tempTime /= 1000;
-      dtostrf(tempTime, 6, 3, s);  //時間
-      dtostrf(disp, 6, 2, c);  //温度
-      Serial.print(s);
-      Serial.print(";TMP1;");
-      Serial.print(c);
-      Serial.print(";");
-      Serial.println();    
-    } else if (x == SLAVE2) {
-      tempTime2 = millis();
-      tempTime2 /= 1000;
-      dtostrf(tempTime2, 6, 3, s);  //時間
-      dtostrf(disp2, 6, 2, c);  //温度
-      Serial.print(s2);
-      Serial.print(";TMP2;");
-      Serial.print(c2);
-      Serial.print(";");
-      Serial.println();  
-    }
-  }
-  delay(500);
-}
 
-// 変換 [float->string] 
-String float2String(float value) {
-  String result;
-  result = (String)((int)value);
-  result += ".";
-  value -= (int)value;
-  result += (int)(value * 10);
-  return result;
-}

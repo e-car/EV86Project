@@ -12,8 +12,8 @@
 
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 IPAddress ip;
-char ssid[] = "304HWa-84F1A0"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25　iPhone_shinichi
-char pass[] = "11237204a"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg 　252554123sin
+char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25　 304HWa-84F1A0
+char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg 11237204a
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 WiFiServer server(9090); // 9090番ポートを指定
@@ -36,9 +36,10 @@ typedef struct {
 } XBeeNode;
 
 // ルーター情報の設定
-XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 100, false, false };
-XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 100, false, false };
+//XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 100, false, false };
+//XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 100, false, false };
 XBeeNode router3 = { 0x0013A200, 0x40993791, "RMXBee_ROUTER3", "startAck3", "None", 100, false, false };
+XBeeNode router6 = { 0x0013A200, 0x40707DF7, "RMXBee_ROUTER6", "startAck6", "None", 100, false, false };
 
 // コーディネーター用のインスタンスを生成
 EV86XBeeC coor = EV86XBeeC();
@@ -100,25 +101,25 @@ void setup() {
   lcd.print(hostXBee);
   delay(1000);
   
-  // リモートXBeeのアドレス指定と設定情報の取得
-  coor.setDstAdd64(router1.h64Add, router1.l64Add);
-  coor.rmXBeeStatus();
-  lcd.clear();
-  lcd.setCursor(0, 0); // (0列, 0行)　 
-  lcd.print("Checked STATUS");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router1.nodeName);
-  delay(1000);
-  
-  // リモートXBeeのアドレス指定と設定情報の取得
-  coor.setDstAdd64(router2.h64Add, router2.l64Add);
-  coor.rmXBeeStatus();
-  lcd.clear();
-  lcd.setCursor(0, 0); // (0列, 0行)　 
-  lcd.print("Checked STATUS");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router2.nodeName);
-  delay(2000);
+//  // リモートXBeeのアドレス指定と設定情報の取得
+//  coor.setDstAdd64(router1.h64Add, router1.l64Add);
+//  coor.rmXBeeStatus();
+//  lcd.clear();
+//  lcd.setCursor(0, 0); // (0列, 0行)　 
+//  lcd.print("Checked STATUS");
+//  lcd.setCursor(0, 1); // (0列, 1行)
+//  lcd.print(router1.nodeName);
+//  delay(1000);
+//  
+//  // リモートXBeeのアドレス指定と設定情報の取得
+//  coor.setDstAdd64(router2.h64Add, router2.l64Add);
+//  coor.rmXBeeStatus();
+//  lcd.clear();
+//  lcd.setCursor(0, 0); // (0列, 0行)　 
+//  lcd.print("Checked STATUS");
+//  lcd.setCursor(0, 1); // (0列, 1行)
+//  lcd.print(router2.nodeName);
+//  delay(2000);
   
   // リモートXBeeのアドレス指定と設定情報の取得
   coor.setDstAdd64(router3.h64Add, router3.l64Add);
@@ -130,62 +131,73 @@ void setup() {
   lcd.print(router3.nodeName);
   delay(2000);
   
+  // リモートXBeeのアドレス指定と設定情報の取得
+  coor.setDstAdd64(router6.h64Add, router6.l64Add);
+  coor.rmXBeeStatus();
+  lcd.clear();
+  lcd.setCursor(0, 0); // (0列, 0行)　 
+  lcd.print("Checked STATUS");
+  lcd.setCursor(0, 1); // (0列, 1行)
+  lcd.print(router6.nodeName);
+  delay(2000);
+  
   
   // REMOTE XBeeとのコネクションを張る
   /***********************************************************************************/  
   
-  // LCDにXBeeコネクション状況を知らせる
+//  // LCDにXBeeコネクション状況を知らせる
+//  lcd.clear();
+//  lcd.setCursor(0, 0); // (0列, 0行)
+//  lcd.print("Connecting to");
+//  lcd.setCursor(0, 1); // (0列, 1行)
+//  lcd.print(router1.nodeName);
+  
+//  //コネクション確立のためのセッション 
+//  if (connectProcess(router1)) {
+//    router1.firstTrans = true;
+//    lcd.clear();
+//    lcd.setCursor(0, 0); // (0列, 0行)　 
+//    lcd.print("Connected to");
+//  } else {
+//    router1.firstTrans = false;
+//    lcd.clear();
+//    lcd.setCursor(0, 0); // (0列, 0行)　 
+//    lcd.print("Disconnected to");
+//  }
+//  lcd.setCursor(0, 1); // (0列, 1行)
+//  lcd.print(router1.nodeName); 
+//   
+//  delay(1000); 
+  
+//  lcd.clear();
+//  lcd.setCursor(0, 0); // (0列, 0行)
+//  lcd.print("Connecting to");
+//  lcd.setCursor(0, 1); // (0列, 1行)
+//  lcd.print(router2.nodeName);
+//   
+//  //コネクション確立のためのセッション
+//  if (connectProcess(router2)) {
+//    router2.firstTrans = true;
+//    lcd.clear();
+//    lcd.setCursor(0, 0); // (0列, 0行)　 
+//    lcd.print("Connected to");
+//  } else {
+//    router2.firstTrans = false;
+//    lcd.clear();
+//    lcd.setCursor(0, 0); // (0列, 0行)　 
+//    lcd.print("Disconnected to");
+//  }
+//  lcd.setCursor(0, 1); // (0列, 1行)
+//  lcd.print(router2.nodeName);
+//  
+//  delay(1000);
+  
+  
   lcd.clear();
   lcd.setCursor(0, 0); // (0列, 0行)
   lcd.print("Connecting to");
   lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router1.nodeName);
-  
-  //コネクション確立のためのセッション 
-  if (connectProcess(router1)) {
-    router1.firstTrans = true;
-    lcd.clear();
-    lcd.setCursor(0, 0); // (0列, 0行)　 
-    lcd.print("Connected to");
-  } else {
-    router1.firstTrans = false;
-    lcd.clear();
-    lcd.setCursor(0, 0); // (0列, 0行)　 
-    lcd.print("Disconnected to");
-  }
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router1.nodeName); 
-   
-  delay(1000); 
-  
-  lcd.clear();
-  lcd.setCursor(0, 0); // (0列, 0行)
-  lcd.print("Connecting to");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router2.nodeName);
-   
-  //コネクション確立のためのセッション
-  if (connectProcess(router2)) {
-    router2.firstTrans = true;
-    lcd.clear();
-    lcd.setCursor(0, 0); // (0列, 0行)　 
-    lcd.print("Connected to");
-  } else {
-    router2.firstTrans = false;
-    lcd.clear();
-    lcd.setCursor(0, 0); // (0列, 0行)　 
-    lcd.print("Disconnected to");
-  }
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router2.nodeName);
-  
-  delay(1000);
-  
-  lcd.clear();
-  lcd.setCursor(0, 0); // (0列, 0行)
-  lcd.print("Connecting to");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router3.nodeName);
+  lcd.print(router6.nodeName);
    
   //コネクション確立のためのセッション
   if (connectProcess(router3)) {
@@ -194,7 +206,7 @@ void setup() {
     lcd.setCursor(0, 0); // (0列, 0行)　 
     lcd.print("Connected to");
   } else {
-    router3.firstTrans = false;
+    router6.firstTrans = false;
     lcd.clear();
     lcd.setCursor(0, 0); // (0列, 0行)　 
     lcd.print("Disconnected to");
@@ -202,7 +214,23 @@ void setup() {
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router3.nodeName);
   
-
+  //コネクション確立のためのセッション 
+  if (connectProcess(router6)) {
+    router6.firstTrans = true;
+    lcd.clear();
+    lcd.setCursor(0, 0); // (0列, 0行)　 
+    lcd.print("Connected to");
+  } else {
+    router6.firstTrans = false;
+    lcd.clear();
+    lcd.setCursor(0, 0); // (0列, 0行)　 
+    lcd.print("Disconnected to");
+  }
+  lcd.setCursor(0, 1); // (0列, 1行)
+  lcd.print(router6.nodeName); 
+   
+  delay(1000);
+  
 
    // WiFi環境の構築　別途、WiFi.inoプログラムを参照するように
   /***********************************************************************************/
@@ -250,34 +278,36 @@ void loop() {
         // クライアントからのリクエストの受け取りとその処理
         /***********************************************************************************/
         switch(revChar) {  
-          case 'g':
+          case 'G':
           // センサーデータ取得 from XBee
             Serial.println("Sensor Data by XBee");
             /*****************************************************************/
-            gettingData(router1);
-            Serial.println("*******************************************"); 
-            gettingData(router2);  
+            //gettingData(router1);
+            //Serial.println("*******************************************"); 
+            //gettingData(router2);  
             Serial.println("*******************************************"); 
             gettingData(router3);
+            Serial.println("*******************************************"); 
+            gettingData(router6);
             /*****************************************************************/
             
-            // send router1 data to client by wifi
-            if (router1.firstTrans && router1.transmit) {
-              Serial.println(router1.sensorData);
-              client.println(router1.sensorData);
-            } else {
-              Serial.println("Couldn't get router.sensorData");
-              client.println("Couldn't get router.sensorData");
-            }
-            
-            // send router2 data to client by wifi
-            if (router2.firstTrans && router2.transmit) {
-              Serial.println(router2.sensorData);
-              client.println(router2.sensorData);
-            } else {
-              Serial.println("Couldn't get router2.sensorData");
-              client.println("Couldn't get router2.sensorData");
-            }
+//            // send router1 data to client by wifi
+//            if (router1.firstTrans && router1.transmit) {
+//              Serial.println(router1.sensorData);
+//              client.println(router1.sensorData);
+//            } else {
+//              Serial.println("Couldn't get router.sensorData");
+//              client.println("Couldn't get router.sensorData");
+//            }
+//            
+//            // send router2 data to client by wifi
+//            if (router2.firstTrans && router2.transmit) {
+//              Serial.println(router2.sensorData);
+//              client.println(router2.sensorData);
+//            } else {
+//              Serial.println("Couldn't get router2.sensorData");
+//              client.println("Couldn't get router2.sensorData");
+//            }
             
             // send router3 data to client by wifi
             if (router3.firstTrans && router3.transmit) {
@@ -287,14 +317,24 @@ void loop() {
               Serial.println("Couldn't get router3.sensorData");
               client.println("Couldn't get router3.sensorData");
             }
+            
+            // send router3 data to client by wifi
+            if (router6.firstTrans && router6.transmit) {
+              Serial.println(router6.sensorData);
+              client.println(router6.sensorData);
+            } else {
+              Serial.println("Couldn't get router3.sensorData");
+              client.println("Couldn't get router3.sensorData");
+            }
+            
             break;
           
-          case 't':
+          case 'T':
             Serial.println("test EV86 car data");
             client.println("test EV86 car data");
             break;
             
-          case 's':
+          case 'S':
             // close the connection:
             Serial.println("Stop Signal & Close Socket");
             client.flush();
@@ -317,25 +357,25 @@ void loop() {
             break;
         }
         
-        // 接続状態の確認
-        // router firstTrans
-        Serial.print(router1.nodeName);
-        Serial.print(" First Connect Status : ");
-        Serial.println(router1.firstTrans);
-        // router
-        Serial.print(router1.nodeName);
-        Serial.print(" Connect Status : ");
-        Serial.println(router1.transmit);
-        
-        // router2 firstTrans
-        Serial.print(router2.nodeName);
-        Serial.print(" First Connect Status : ");
-        Serial.println(router2.firstTrans);
-        // router2
-        Serial.print(router2.nodeName);
-        Serial.print(" Connect Status : ");
-        Serial.println(router2.transmit);
-        Serial.println();
+//        // 接続状態の確認
+//        // router firstTrans
+//        Serial.print(router1.nodeName);
+//        Serial.print(" First Connect Status : ");
+//        Serial.println(router1.firstTrans);
+//        // router
+//        Serial.print(router1.nodeName);
+//        Serial.print(" Connect Status : ");
+//        Serial.println(router1.transmit);
+//        
+//        // router2 firstTrans
+//        Serial.print(router2.nodeName);
+//        Serial.print(" First Connect Status : ");
+//        Serial.println(router2.firstTrans);
+//        // router2
+//        Serial.print(router2.nodeName);
+//        Serial.print(" Connect Status : ");
+//        Serial.println(router2.transmit);
+//        Serial.println();
         
         // router3 firstTrans
         Serial.print(router3.nodeName);
@@ -345,6 +385,16 @@ void loop() {
         Serial.print(router3.nodeName);
         Serial.print(" Connect Status : ");
         Serial.println(router3.transmit);
+        Serial.println();
+        
+        // router6 firstTrans
+        Serial.print(router6.nodeName);
+        Serial.print(" First Connect Status : ");
+        Serial.println(router6.firstTrans);
+        // router6
+        Serial.print(router6.nodeName);
+        Serial.print(" Connect Status : ");
+        Serial.println(router6.transmit);
         Serial.println();
         
         Serial.println("-------------------------------------------------");

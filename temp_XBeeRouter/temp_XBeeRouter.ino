@@ -108,12 +108,18 @@ void setup(){
 
 void loop(){
   Serial.println("-----------------------------");
+  // 送信用データの初期化
+  senData = "";
   
   // センサデータの取得・送信用データの作成
   /***********************************************/
-  // 送信用データに変換 (Temp1のみ)
+  // 温度センサの値を読む
+  Serial.println("[Sensor_data]");
+  
+  // 送信用データに変換
   senData = getTemp(SLAVE1);
-  // senData = getTemp(SLAVE2);
+  senData += ",";
+  senData += getTemp(SLAVE2);
   
   // XBeeデータ受信
   /************************************************/
@@ -167,7 +173,7 @@ void loop(){
   
   // 受信データの初期化
   router.clearData();
-  delay(300);
+  delay(30);
 }
 
 

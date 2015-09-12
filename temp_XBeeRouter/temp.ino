@@ -7,8 +7,7 @@
 
 // 熱電対式温度センサ取得関数
 String getTemp(int x){
-  // 温度センサの値を読む
-  Serial.println("[Sensor_data]");
+  
   
   digitalWrite(x,LOW);                                      //  Enable the chip
   thermocouple  = (unsigned int)SPI.transfer(0x00) << 8;   //  Read high byte thermocouple
@@ -48,23 +47,17 @@ String getTemp(int x){
       tempTime /= 1000;
       dtostrf(tempTime, 6, 3, s);  //時間
       dtostrf(disp, 6, 2, c);  //温度
-      Serial.print(s);
-      Serial.print(";TMP1;");
-      Serial.print(c);
-      Serial.print(";");
-      Serial.println();
+      Serial.print("Temp1 : ");
+      Serial.println(c);
       return float2String(disp); // 戻り値
       
     } else if (x == SLAVE2) {
       tempTime2 = millis();
       tempTime2 /= 1000;
-      dtostrf(tempTime2, 6, 3, s);  //時間
-      dtostrf(disp2, 6, 2, c);  //温度
-      Serial.print(s2);
-      Serial.print(";TMP2;");
-      Serial.print(c2);
-      Serial.print(";");
-      Serial.println();  
+      dtostrf(tempTime2, 6, 3, s2);  //時間
+      dtostrf(disp2, 6, 2, c2);  //温度
+      Serial.print("Temp2 : ");
+      Serial.println(c2 );
       return float2String(disp2); // 戻り値
       
     }

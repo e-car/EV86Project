@@ -25,7 +25,7 @@ String getWaterTemp() {
   Serial.println(temp2);
   
   // 送信用データに変換
-  return float2String(temp1);
+  return float2String(temp1) + "," + float2String(temp2);
 }
 
 // 変換 [float->string] 

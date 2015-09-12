@@ -8,12 +8,12 @@
 *
 */
 
-//#define MEGA
-#define EDISON
+#define MEGA
+//#define EDISON
 
-//#define ROUTER1
+#define ROUTER1
 //#define ROUTER2
-#define ROUTER3
+//#define ROUTER3
 
 // ヘッダーのインクルード
 #ifdef MEGA
@@ -74,13 +74,11 @@ void setup() {
   Serial.begin(9600);                          // Arduino-PC間の通信
 #ifdef MEGA
   myserial.begin(9600);
-  myserial.flush();
   router.begin(myserial);
 #endif
 
 #ifdef EDISON
   Serial1.begin(9600);                         // Arduino-XBee間の通信
-  Serial1.flush();
   router.begin(Serial1);
 #endif
   delay(5000); 
@@ -155,7 +153,7 @@ void loop() {
   
   // 受信データの初期化
   router.clearData();
-  delay(300);
+  delay(30);
 }
 
 

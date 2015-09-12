@@ -120,7 +120,7 @@ void setup() {
   lcd.print("Checked STATUS");
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router2.nodeName);
-  delay(2000);
+  delay(1000);
   
   // リモートXBeeのアドレス指定と設定情報の取得
   coor.setDstAdd64(router3.h64Add, router3.l64Add);
@@ -130,7 +130,7 @@ void setup() {
   lcd.print("Checked STATUS");
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router3.nodeName);
-  delay(2000);
+  delay(1000);
     
   // REMOTE XBeeとのコネクションを張る
   /***********************************************************************************/  
@@ -157,7 +157,7 @@ void setup() {
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router1.nodeName); 
    
-  delay(1000); 
+  delay(500); 
   
   lcd.clear();
   lcd.setCursor(0, 0); // (0列, 0行)
@@ -180,8 +180,7 @@ void setup() {
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router2.nodeName);
   
-  delay(1000);
-  
+  delay(500);
   
   lcd.clear();
   lcd.setCursor(0, 0); // (0列, 0行)
@@ -208,7 +207,6 @@ void setup() {
    // WiFi環境の構築　別途、WiFi.inoプログラムを参照するように
   /***********************************************************************************/
   setWiFi();
-  delay(3000);
   lcd.clear();
 }
 
@@ -233,6 +231,7 @@ void loop() {
     // クライアント(Android)とサーバー(Edison)
     // 処理に約5秒かかる
     while ((connectStatus = client.connected())) { // 注意!! client.connected()関数にはバグあり!
+      socketTimeCount = 0;
       Serial.print("Socket TimeCount : ");
       Serial.println(socketTimeCount);
       Serial.print("Connect Status : ");
@@ -245,7 +244,6 @@ void loop() {
       lcd.print("WiFi Client");
       
       if (client.available() > 0) {
-        socketTimeCount = 0;
         char revChar = client.read(); // read from TCP buffer
         Serial.print("Get [");
         Serial.print(revChar);
@@ -270,7 +268,7 @@ void loop() {
               Serial.println(router1.sensorData);
             } else {
               Serial.println("Couldn't get router1.sensorData");
-              router1.sensorData = "0.00";
+              router1.sensorData = "NA,NA";
             }
             
             // send router2 data to client by wifi
@@ -278,7 +276,7 @@ void loop() {
               Serial.println(router2.sensorData);
             } else {
               Serial.println("Couldn't get router2.sensorData");
-              router2.sensorData = "0.00";
+              router2.sensorData = "NA,NA";
             }
             
             // send router3 data to client by wifi
@@ -286,10 +284,9 @@ void loop() {
               Serial.println(router3.sensorData);
             } else {
               Serial.println("Couldn't get router3.sensorData");
-              router3.sensorData = "0.00";
+              router3.sensorData = "NA,NA";
             }
             
-            sendWiFiData += "#";
             sendWiFiData += router1.sensorData;
             sendWiFiData += ",";
             sendWiFiData += router2.sensorData;
@@ -300,6 +297,7 @@ void loop() {
             Serial.print(sendWiFiData);
             Serial.println(" ]");
             client.println(sendWiFiData);
+            sendWiFiData = "";
             break;
           
           case 'T':
@@ -328,7 +326,8 @@ void loop() {
             Serial.println("Error : Request from Client is invalid");
             client.println("Error : Request from Client is invalid");
             break;
-        }
+        } // switch
+        /***********************************************************************************/
         
         // 接続状態の確認
         // router firstTrans
@@ -358,10 +357,7 @@ void loop() {
         Serial.print(" Connect Status : ");
         Serial.println(router3.transmit);
         Serial.println();
-         
         Serial.println("-------------------------------------------------");
-        delay(100);
-        /***********************************************************************************/
       } else {
         socketTimeCount++;
       }
@@ -381,9 +377,8 @@ void loop() {
           client.flush();
           client.stop();
        }
-    } // whileの終了点
+    } // while
   } else {
-    
     if (clientCheckCount > 15) {
       lcd.clear();
       clientCheckCount = 0;
@@ -448,7 +443,7 @@ boolean connectProcess(XBeeNode& router) {
      
     // 受信データの初期化
     coor.clearData(); 
-    delay(30);
+    delay(40);
   }
   
   // 接続応答を送信
@@ -467,7 +462,7 @@ boolean connectProcess(XBeeNode& router) {
          break; 
       }
     }
-    delay(30);  
+    delay(40);  
   };
   
   // 受信データの初期化
@@ -515,7 +510,7 @@ void gettingData(XBeeNode& router) {
     if (apiID < 0) {
       count++;
     }
-    delay(30);  
+    delay(40);  
   };
   
   // 受信データの初期化

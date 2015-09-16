@@ -12,8 +12,8 @@
 
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 IPAddress ip;
-char ssid[] = "304HWa-84F1A0"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25 iPhone_shinichi
-char pass[] = "11237204a"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg 252554123sin
+char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25  304HWa-84F1A0
+char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg  11237204a
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 int serverPort = 9090;
@@ -230,8 +230,7 @@ void loop() {
     socketTimeCount = 0;
     // クライアント(Android)とサーバー(Edison)
     // 処理に約5秒かかる
-    while ((connectStatus = client.connected())) { // 注意!! client.connected()関数にはバグあり!
-      socketTimeCount = 0;
+    while ((connectStatus = client.connected())) { // 注意!! client.connected()関数にはバグあり!                                  
       Serial.print("Socket TimeCount : ");
       Serial.println(socketTimeCount);
       Serial.print("Connect Status : ");
@@ -243,7 +242,9 @@ void loop() {
       lcd.setCursor(0, 1); // (0列, 1行)
       lcd.print("WiFi Client");
       
+      Serial.println("CHECK!!!");
       if (client.available() > 0) {
+        socketTimeCount = 0;
         char revChar = client.read(); // read from TCP buffer
         Serial.print("Get [");
         Serial.print(revChar);
@@ -330,6 +331,7 @@ void loop() {
         /***********************************************************************************/
         
         // 接続状態の確認
+        Serial.println("%%%%%%%%%%%%%%%%%%%Data_Status%%%%%%%%%%%%%%%%%%%%%%%");
         // router firstTrans
         Serial.print(router1.nodeName);
         Serial.print(" First Connect Status : ");
@@ -356,10 +358,13 @@ void loop() {
         Serial.print(router3.nodeName);
         Serial.print(" Connect Status : ");
         Serial.println(router3.transmit);
-        Serial.println();
-        Serial.println("-------------------------------------------------");
+        Serial.println("%%%%%%%%%%%%%%%%%%%Data_Status%%%%%%%%%%%%%%%%%%%%%%%");
       } else {
+        // ソケットタイムアウトカウントをインクリメント
+        Serial.println("socketTimeCount increase !");
         socketTimeCount++;
+        Serial.print("socketTimeCount : ");
+        Serial.println(socketTimeCount);
       }
       
        // 一定時間クライアントから応答がなければ、サーバー側からSocketを切る * client.connected()のバグ対策
@@ -376,8 +381,13 @@ void loop() {
           Serial.println("Socket TimeOut. close Socket from this server");
           client.flush();
           client.stop();
+          break;
        }
+       delay(100);
+       Serial.println("While END");
+       Serial.println("-------------------------------------------------");
     } // while
+    
   } else {
     if (clientCheckCount > 15) {
       lcd.clear();

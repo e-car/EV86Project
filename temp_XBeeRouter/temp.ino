@@ -7,9 +7,8 @@
 
 // 熱電対式温度センサ取得関数
 String getTemp(int x){
-  
-  
-  digitalWrite(x,LOW);                                      //  Enable the chip
+
+  digitalWrite(x,LOW);                                     //  Enable the chip
   thermocouple  = (unsigned int)SPI.transfer(0x00) << 8;   //  Read high byte thermocouple
   thermocouple |= (unsigned int)SPI.transfer(0x00);        //  Read low byte thermocouple 
   internal  = (unsigned int)SPI.transfer(0x00) << 8;       //  Read high byte internal

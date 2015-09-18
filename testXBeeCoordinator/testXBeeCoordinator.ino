@@ -40,7 +40,7 @@ typedef struct {
 // ルーター情報の設定
 XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 50, false, false };
 XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 50, false, false };
-XBeeNode router3 = { 0x0013A200, 0x40993791, "RMXBee_ROUTER3", "startAck3", "None", 50, false, false };
+XBeeNode router3 = { 0x0013A200, 0x40993791, "RMXBee_ROUTER3", "startAck3", "None", 100, false, false };
 
 // コーディネーター用のインスタンスを生成
 EV86XBeeC coor = EV86XBeeC();

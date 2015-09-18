@@ -103,8 +103,6 @@ void loop() {
   
   // XBeeデータ受信
   /************************************************/
-  // 受信データの初期化
-  router.clearData();
   
   // 受信パケットの確認
   Serial.println("[get Packet]");

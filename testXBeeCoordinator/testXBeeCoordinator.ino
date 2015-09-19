@@ -12,8 +12,8 @@
 
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 IPAddress ip;
-char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25  304HWa-84F1A0
-char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg  11237204a
+char ssid[] = "304HWa-84F1A0"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25  　iPhone_shinichi
+char pass[] = "11237204a"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg  　252554123sin
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 int serverPort = 9090;
@@ -40,7 +40,7 @@ typedef struct {
 // ルーター情報の設定
 XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 50, false, false };
 XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 50, false, false };
-XBeeNode router3 = { 0x0013A200, 0x40993791, "RMXBee_ROUTER3", "startAck3", "None", 100, false, false };
+XBeeNode router3 = { 0x0013A200, 0x40993791, "RMXBee_ROUTER3", "startAck3", "None", 50, false, false };
 
 // コーディネーター用のインスタンスを生成
 EV86XBeeC coor = EV86XBeeC();

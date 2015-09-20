@@ -28,11 +28,11 @@ String getVoltage() {
   val_Vol = 0.0;
   for (int i = 0;i < 3;i++){
     val_Vol += (float)analogRead(analogPin_Vol);    // アナログピンを読み取る
-    delay(10);
+    delay(50);
   }
   val_Vol = val_Vol / 3;
   
-  amplitude_Vol = (5.0 * val_Vol) / 1024;
+  amplitude_Vol = val_Vol;
   Serial.print("ad_data_Voltage:");
   Serial.println(val_Vol);
   Serial.print("data_Voltage: ");

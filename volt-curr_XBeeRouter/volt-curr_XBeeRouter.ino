@@ -105,9 +105,7 @@ void loop() {
   Serial.println("[Sensor_data]");
   // 電流センサの値を読む
   senData = getCurrent();
-  
   senData += ',';
- 
   senData += getVoltage();
   
   // XBeeデータ受信

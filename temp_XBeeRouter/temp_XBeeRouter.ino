@@ -116,8 +116,9 @@ void loop(){
   // 温度センサの値を読む
   Serial.println("[Sensor_data]");
   
+  String bufString = "";
   // 送信用データに変換
-  senData = getTemp(SLAVE1);
+  bufString = getTemp(SLAVE1);
   senData += ",";
   senData += getTemp(SLAVE2);
   

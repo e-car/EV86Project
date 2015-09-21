@@ -48,7 +48,7 @@ String getTemp(int x){
       dtostrf(disp, 6, 2, c);  //温度
       Serial.print("Temp1 : ");
       Serial.println(c);
-      delay(250);
+      //delay(250);
       return float2String(disp); // 戻り値
       
     } else if (x == SLAVE2) {
@@ -58,7 +58,7 @@ String getTemp(int x){
       dtostrf(disp2, 6, 2, c2);  //温度
       Serial.print("Temp2 : ");
       Serial.println(c2 );
-      delay(250);
+      //delay(250);
       return float2String(disp2); // 戻り値
       
     }

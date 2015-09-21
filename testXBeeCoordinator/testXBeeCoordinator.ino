@@ -20,7 +20,7 @@ int serverPort = 9090;
 WiFiServer server(serverPort); // 9090番ポートを指定
 WiFiClient client;
 int socketTimeCount = 0;
-const int socketTimeOut = 30; //10 20
+const int socketTimeOut = 20; //10 20 30
 boolean connectStatus;
 String sendWiFiData = "";
 /* -------------------------------- Wifi Parameters  -------------------------------- */
@@ -38,9 +38,9 @@ typedef struct {
 } XBeeNode;
 
 // ルーター情報の設定
-XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 50, false, false };
-XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 50, false, false };
-XBeeNode router3 = { 0x0013A200, 0x40993791, "RMXBee_ROUTER3", "startAck3", "None", 50, false, false };
+XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 30, false, false };
+XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 30, false, false };
+XBeeNode router3 = { 0x0013A200, 0x40E756D6, "RMXBee_ROUTER3", "startAck3", "None", 30, false, false };
 
 // コーディネーター用のインスタンスを生成
 EV86XBeeC coor = EV86XBeeC();
@@ -264,29 +264,48 @@ void loop() {
             Serial.println("*******************************************"); 
             /*****************************************************************/
             
-            // send router1 data to client by wifi
-            if (router1.firstTrans && router1.transmit) {
-              Serial.println(router1.sensorData);
-            } else {
-              Serial.println("Couldn't get router1.sensorData");
-              router1.sensorData = "NA,NA";
-            }
+//            // send router1 data to client by wifi
+//            if (router1.firstTrans && router1.transmit) {
+//              Serial.println(router1.sensorData);
+//            } else {
+//              Serial.println("Couldn't get router1.sensorData");
+//              router1.sensorData = "NA,NA";
+//            }
+              if (router1.transmit) {
+                Serial.println(router1.sensorData);
+              } else {
+                Serial.println("Couldn't get router1.sensorData");
+                router1.sensorData = "NA,NA";
+              }
             
-            // send router2 data to client by wifi
-            if (router2.firstTrans && router2.transmit) {
-              Serial.println(router2.sensorData);
-            } else {
-              Serial.println("Couldn't get router2.sensorData");
-              router2.sensorData = "NA,NA";
-            }
+//            // send router2 data to client by wifi
+//            if (router2.firstTrans && router2.transmit) {
+//              Serial.println(router2.sensorData);
+//            } else {
+//              Serial.println("Couldn't get router2.sensorData");
+//              router2.sensorData = "NA,NA";
+//            }
+              if (router2.transmit) {
+                Serial.println(router2.sensorData);
+              } else {
+                Serial.println("Couldn't get router1.sensorData");
+                router2.sensorData = "NA,NA";
+              }
             
-            // send router3 data to client by wifi
-            if (router3.firstTrans && router3.transmit) {
-              Serial.println(router3.sensorData);
-            } else {
-              Serial.println("Couldn't get router3.sensorData");
-              router3.sensorData = "NA,NA";
-            }
+//            // send router3 data to client by wifi
+//            if (router3.firstTrans && router3.transmit) {
+//              Serial.println(router3.sensorData);
+//            } else {
+//              Serial.println("Couldn't get router3.sensorData");
+//              router3.sensorData = "NA,NA";
+//            }
+              if (router3.transmit) {
+                Serial.println(router3.sensorData);
+              } else {
+                Serial.println("Couldn't get router1.sensorData");
+                router3.sensorData = "NA,NA";
+              }
+
             
             sendWiFiData += router1.sensorData;
             sendWiFiData += ",";
@@ -431,8 +450,8 @@ boolean connectProcess(XBeeNode& router) {
   int stopCount = 0;
   for (int apiID, i = 0; (apiID = coor.getPacket()) != ZB_RX_RESPONSE && !coor.checkData(router.startAck); i++) {  
     
-    // 5回再送信をしても応答がなかったら、接続を行わない。
-    if (stopCount > 5) {
+    // 3回再送信をしても応答がなかったら、接続を行わない。
+    if (stopCount > 2) {
       Serial.println("Stop requesting and finish trying to connect");
       delay(1000);
       return false;

@@ -28,7 +28,7 @@ String getTemp(int x){
       if (x == SLAVE1) {
         disp = (thermocouple >> 2) * 0.25;
       } else if (x == SLAVE2) {
-         disp2 = (thermocouple >> 2) * 0.25;
+        disp2 = (thermocouple >> 2) * 0.25;
       }
       
     }
@@ -42,23 +42,17 @@ String getTemp(int x){
     }
     
     if (x == SLAVE1) {
-      tempTime = millis();
-      tempTime /= 1000;
-      dtostrf(tempTime, 6, 3, s);  //時間
-      dtostrf(disp, 6, 2, c);  //温度
-      Serial.print("Temp1 : ");
-      Serial.println(c);
-      //delay(250);
+      //tempTime = millis();
+      //tempTime /= 1000;
+      //dtostrf(tempTime, 6, 3, s);  //時間
+      //dtostrf(disp, 6, 2, c);  //温度
       return float2String(disp); // 戻り値
       
     } else if (x == SLAVE2) {
-      tempTime2 = millis();
-      tempTime2 /= 1000;
-      dtostrf(tempTime2, 6, 3, s2);  //時間
-      dtostrf(disp2, 6, 2, c2);  //温度
-      Serial.print("Temp2 : ");
-      Serial.println(c2 );
-      //delay(250);
+      //tempTime2 = millis();
+      //tempTime2 /= 1000;
+      //dtostrf(tempTime2, 6, 3, s2);  //時間
+      //dtostrf(disp2, 6, 2, c2);  //温度
       return float2String(disp2); // 戻り値
       
     }
@@ -72,6 +66,6 @@ String float2String(float value) {
   result = (String)((int)value);
   result += ".";
   value -= (int)value;
-  result += (int)(value * 10);
+  result += (int)(value * 10); // caution! 対応していない部分有り
   return result;
 }

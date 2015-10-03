@@ -58,8 +58,8 @@ unsigned int thermocouple;  // 14-Bit Thermocouple Temperature Data + 2-Bit
 unsigned int internal;      // 12-Bit Internal Temperature Data + 4-Bit
 float tempTime, tempTime2;
 float disp, disp2;                 // display value
-char s[10], s2[10]; // 時間
-char c[10], c2[10];// 温度
+//char s[10], s2[10]; // 時間
+//char c[10], c2[10];// 温度
 
 // プロトタイプ宣言
 String float2String(float value);
@@ -108,7 +108,6 @@ void setup(){
 
 void loop(){
   Serial.println("-----------------------------");
-  // 送信用データの初期化
   senData = "";
   
   // センサデータの取得・送信用データの作成
@@ -120,11 +119,13 @@ void loop(){
   senData = getTemp(SLAVE1);
   senData += ",";
   senData += getTemp(SLAVE2);
+  Serial.print("Temp1 : Temp2 ::");
+  Serial.println(senData);
   
   // XBeeデータ受信
   /************************************************/
   // 受信データの初期化
-  //router.clearData();
+  router.clearData();
   
   // 受信パケットの確認
   Serial.println("[get Packet]");
@@ -156,6 +157,7 @@ void loop(){
     Serial.print("send : ");
     Serial.println(senData);
     router.sendData(senData);
+    //router.sendData("27.0"); // 固定値
     
     while(router.getPacket() != ZB_TX_STATUS_RESPONSE) {
       delay(20);
@@ -170,6 +172,7 @@ void loop(){
   // 接続状態の確認
   Serial.print("Transmit Status : ");
   Serial.println(coor.transmit);
+  
   
   // 受信データの初期化
   router.clearData();

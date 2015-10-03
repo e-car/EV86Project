@@ -12,8 +12,8 @@
 
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 IPAddress ip;
-char ssid[] = "304HWa-84F1A0"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25  　iPhone_shinichi
-char pass[] = "11237204a"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg  　252554123sin
+char ssid[] = "304HWa-84F1A0"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25   iPhone_shinichi
+char pass[] = "11237204a"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg  252554123sin
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 int serverPort = 9090;
@@ -38,9 +38,9 @@ typedef struct {
 } XBeeNode;
 
 // ルーター情報の設定
-XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 30, false, false };
-XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 30, false, false };
-XBeeNode router3 = { 0x0013A200, 0x40E756D6, "RMXBee_ROUTER3", "startAck3", "None", 30, false, false };
+XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 50, false, false };
+XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 50, false, false };
+XBeeNode router3 = { 0x0013A200, 0x40993791, "RMXBee_ROUTER3", "startAck3", "None", 50, false, false };
 
 // コーディネーター用のインスタンスを生成
 EV86XBeeC coor = EV86XBeeC();
@@ -93,14 +93,14 @@ void setup() {
   // HOST, REMOTE XBeeの設定を確認  
   /***********************************************************************************/  
     
-  // ホストXBeeの設定確認
-  coor.hsXBeeStatus();
-  lcd.clear();
-  lcd.setCursor(0, 0); // (0列, 0行)　 
-  lcd.print("Checked STATUS");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(hostXBee);
-  delay(1000);
+//  // ホストXBeeの設定確認
+//  coor.hsXBeeStatus();
+//  lcd.clear();
+//  lcd.setCursor(0, 0); // (0列, 0行)　 
+//  lcd.print("Checked STATUS");
+//  lcd.setCursor(0, 1); // (0列, 1行)
+//  lcd.print(hostXBee);
+//  delay(500);
   
   // リモートXBeeのアドレス指定と設定情報の取得
   coor.setDstAdd64(router1.h64Add, router1.l64Add);
@@ -110,7 +110,7 @@ void setup() {
   lcd.print("Checked STATUS");
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router1.nodeName);
-  delay(1000);
+  delay(500);
   
   // リモートXBeeのアドレス指定と設定情報の取得
   coor.setDstAdd64(router2.h64Add, router2.l64Add);
@@ -120,7 +120,7 @@ void setup() {
   lcd.print("Checked STATUS");
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router2.nodeName);
-  delay(1000);
+  delay(500);
   
   // リモートXBeeのアドレス指定と設定情報の取得
   coor.setDstAdd64(router3.h64Add, router3.l64Add);
@@ -130,7 +130,7 @@ void setup() {
   lcd.print("Checked STATUS");
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router3.nodeName);
-  delay(1000);
+  delay(500);
     
   // REMOTE XBeeとのコネクションを張る
   /***********************************************************************************/  
@@ -264,47 +264,29 @@ void loop() {
             Serial.println("*******************************************"); 
             /*****************************************************************/
             
-//            // send router1 data to client by wifi
-//            if (router1.firstTrans && router1.transmit) {
-//              Serial.println(router1.sensorData);
-//            } else {
-//              Serial.println("Couldn't get router1.sensorData");
-//              router1.sensorData = "NA,NA";
-//            }
-              if (router1.transmit) {
-                Serial.println(router1.sensorData);
-              } else {
-                Serial.println("Couldn't get router1.sensorData");
-                router1.sensorData = "NA,NA";
-              }
-            
-//            // send router2 data to client by wifi
-//            if (router2.firstTrans && router2.transmit) {
-//              Serial.println(router2.sensorData);
-//            } else {
-//              Serial.println("Couldn't get router2.sensorData");
-//              router2.sensorData = "NA,NA";
-//            }
-              if (router2.transmit) {
-                Serial.println(router2.sensorData);
-              } else {
-                Serial.println("Couldn't get router1.sensorData");
-                router2.sensorData = "NA,NA";
-              }
-            
-//            // send router3 data to client by wifi
-//            if (router3.firstTrans && router3.transmit) {
-//              Serial.println(router3.sensorData);
-//            } else {
-//              Serial.println("Couldn't get router3.sensorData");
-//              router3.sensorData = "NA,NA";
-//            }
-              if (router3.transmit) {
-                Serial.println(router3.sensorData);
-              } else {
-                Serial.println("Couldn't get router1.sensorData");
-                router3.sensorData = "NA,NA";
-              }
+            // send router1 data to client by wifi
+            if (router1.transmit) {
+              Serial.println(router1.sensorData);
+            } else {
+              Serial.println("Couldn't get router1.sensorData");
+              router1.sensorData = "NA,NA";
+            }
+          
+            // send router2 data to client by wifi
+            if (router2.transmit) {
+              Serial.println(router2.sensorData);
+            } else {
+              Serial.println("Couldn't get router1.sensorData");
+              router2.sensorData = "NA,NA";
+            }
+          
+            // send router3 data to client by wifi
+            if (router3.transmit) {
+              Serial.println(router3.sensorData);
+            } else {
+              Serial.println("Couldn't get router1.sensorData");
+              router3.sensorData = "NA,NA";
+            }
 
             
             sendWiFiData += router1.sensorData;
@@ -520,7 +502,7 @@ void gettingData(XBeeNode& router) {
     if (count > router.timeout) {
       router.transmit = false;
       coor.bufFlush();
-      Serial.print("Couldn't receive sensor data from");
+      Serial.print("Couldn't receive sensor data from ");
       Serial.print(router.nodeName);
       Serial.println(" on XBee Network");
       break;

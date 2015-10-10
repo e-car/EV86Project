@@ -10,10 +10,14 @@
 #include "ev86XBee.h"
 #include "rgb_lcd.h"
 
+#define ROUTER1
+#define ROUTER2
+//#define ROUTER3
+
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 IPAddress ip;
-char ssid[] = "304HWa-84F1A0"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25   iPhone_shinichi
-char pass[] = "11237204a"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg  252554123sin
+char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25    304HWa-84F1A0
+char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg   11237204a
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 int serverPort = 9090;
@@ -38,9 +42,17 @@ typedef struct {
 } XBeeNode;
 
 // ルーター情報の設定
+#ifdef ROUTER1
 XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 50, false, false };
+#endif
+
+#ifdef ROUTER2
 XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 50, false, false };
+#endif
+
+#ifdef ROUTER3
 XBeeNode router3 = { 0x0013A200, 0x40993791, "RMXBee_ROUTER3", "startAck3", "None", 50, false, false };
+#endif
 
 // コーディネーター用のインスタンスを生成
 EV86XBeeC coor = EV86XBeeC();
@@ -93,15 +105,16 @@ void setup() {
   // HOST, REMOTE XBeeの設定を確認  
   /***********************************************************************************/  
     
-//  // ホストXBeeの設定確認
-//  coor.hsXBeeStatus();
-//  lcd.clear();
-//  lcd.setCursor(0, 0); // (0列, 0行)　 
-//  lcd.print("Checked STATUS");
-//  lcd.setCursor(0, 1); // (0列, 1行)
-//  lcd.print(hostXBee);
-//  delay(500);
+  // ホストXBeeの設定確認
+  coor.hsXBeeStatus();
+  lcd.clear();
+  lcd.setCursor(0, 0); // (0列, 0行)　 
+  lcd.print("Checked STATUS");
+  lcd.setCursor(0, 1); // (0列, 1行)
+  lcd.print(hostXBee);
+  delay(500);
   
+#ifdef ROUTER1  
   // リモートXBeeのアドレス指定と設定情報の取得
   coor.setDstAdd64(router1.h64Add, router1.l64Add);
   coor.rmXBeeStatus();
@@ -111,7 +124,9 @@ void setup() {
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router1.nodeName);
   delay(500);
+#endif
   
+#ifdef ROUTER2
   // リモートXBeeのアドレス指定と設定情報の取得
   coor.setDstAdd64(router2.h64Add, router2.l64Add);
   coor.rmXBeeStatus();
@@ -121,7 +136,9 @@ void setup() {
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router2.nodeName);
   delay(500);
+#endif
   
+#ifdef ROUTER3  
   // リモートXBeeのアドレス指定と設定情報の取得
   coor.setDstAdd64(router3.h64Add, router3.l64Add);
   coor.rmXBeeStatus();
@@ -131,10 +148,11 @@ void setup() {
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router3.nodeName);
   delay(500);
+#endif
     
   // REMOTE XBeeとのコネクションを張る
   /***********************************************************************************/  
-  
+#ifdef ROUTER1  
   // LCDにXBeeコネクション状況を知らせる
   lcd.clear();
   lcd.setCursor(0, 0); // (0列, 0行)
@@ -158,7 +176,9 @@ void setup() {
   lcd.print(router1.nodeName); 
    
   delay(500); 
-  
+#endif
+
+#ifdef ROUTER2
   lcd.clear();
   lcd.setCursor(0, 0); // (0列, 0行)
   lcd.print("Connecting to");
@@ -181,7 +201,9 @@ void setup() {
   lcd.print(router2.nodeName);
   
   delay(500);
+#endif
   
+#ifdef ROUTER3
   lcd.clear();
   lcd.setCursor(0, 0); // (0列, 0行)
   lcd.print("Connecting to");
@@ -202,7 +224,7 @@ void setup() {
   }
   lcd.setCursor(0, 1); // (0列, 1行)
   lcd.print(router3.nodeName);
-  
+#endif
 
    // WiFi環境の構築　別途、WiFi.inoプログラムを参照するように
   /***********************************************************************************/
@@ -235,6 +257,7 @@ void loop() {
       Serial.println(socketTimeCount);
       Serial.print("Connect Status : ");
       Serial.println(connectStatus);
+      sendWiFiData = "";
       
       lcd.clear();
       lcd.setCursor(0, 0); // (0列, 0行)
@@ -256,14 +279,23 @@ void loop() {
             // センサーデータ取得 from XBee
             Serial.println("Sensor Data by XBee");
             /*****************************************************************/
+#ifdef ROUTER1
             gettingData(router1);
             Serial.println("*******************************************"); 
+#endif
+
+#ifdef ROUTER2
             gettingData(router2);  
             Serial.println("*******************************************"); 
+#endif
+
+#ifdef ROUTER3
             gettingData(router3);
             Serial.println("*******************************************"); 
+#endif      
             /*****************************************************************/
-            
+
+#ifdef ROUTER1            
             // send router1 data to client by wifi
             if (router1.transmit) {
               Serial.println(router1.sensorData);
@@ -271,7 +303,9 @@ void loop() {
               Serial.println("Couldn't get router1.sensorData");
               router1.sensorData = "NA,NA";
             }
-          
+#endif
+
+#ifdef ROUTER2
             // send router2 data to client by wifi
             if (router2.transmit) {
               Serial.println(router2.sensorData);
@@ -279,7 +313,9 @@ void loop() {
               Serial.println("Couldn't get router1.sensorData");
               router2.sensorData = "NA,NA";
             }
-          
+#endif
+
+#ifdef ROUTER3
             // send router3 data to client by wifi
             if (router3.transmit) {
               Serial.println(router3.sensorData);
@@ -287,14 +323,27 @@ void loop() {
               Serial.println("Couldn't get router1.sensorData");
               router3.sensorData = "NA,NA";
             }
+#endif
 
-            
-            sendWiFiData += router1.sensorData;
-            sendWiFiData += ",";
+//#ifdef ROUTER1            
+//            sendWiFiData += router1.sensorData;
+//            sendWiFiData += ",";
+//#endif
+//
+//#ifdef ROUTER2            
+//            sendWiFiData += router2.sensorData;
+//            sendWiFiData += ",";
+//#endif
+//
+//#ifdef ROUTER3
+//            sendWiFiData += router3.sensorData;
+//#endif
+//            sendWiFiData += "20.0,20.0";
+
+            sendWiFiData += "20.0,20.0,";
             sendWiFiData += router2.sensorData;
-            sendWiFiData += ",";
-            sendWiFiData += router3.sensorData;
-            
+            sendWiFiData += ",20.0,20.0";
+                 
             Serial.print("send to WiFi [ ");
             Serial.print(sendWiFiData);
             Serial.println(" ]");
@@ -333,6 +382,7 @@ void loop() {
         
         // 接続状態の確認
         Serial.println("%%%%%%%%%%%%%%%%%%%Data_Status%%%%%%%%%%%%%%%%%%%%%%%");
+#ifdef ROUTER1        
         // router firstTrans
         Serial.print(router1.nodeName);
         Serial.print(" First Connect Status : ");
@@ -341,7 +391,9 @@ void loop() {
         Serial.print(router1.nodeName);
         Serial.print(" Connect Status : ");
         Serial.println(router1.transmit);
-        
+#endif
+
+#ifdef ROUTER2
         // router2 firstTrans
         Serial.print(router2.nodeName);
         Serial.print(" First Connect Status : ");
@@ -350,7 +402,9 @@ void loop() {
         Serial.print(router2.nodeName);
         Serial.print(" Connect Status : ");
         Serial.println(router2.transmit);
-        
+#endif
+
+#ifdef ROUTER3
         // router3 firstTrans
         Serial.print(router3.nodeName);
         Serial.print(" First Connect Status : ");
@@ -359,6 +413,7 @@ void loop() {
         Serial.print(router3.nodeName);
         Serial.print(" Connect Status : ");
         Serial.println(router3.transmit);
+#endif
         Serial.println("%%%%%%%%%%%%%%%%%%%Data_Status%%%%%%%%%%%%%%%%%%%%%%%");
       } else {
         // ソケットタイムアウトカウントをインクリメント

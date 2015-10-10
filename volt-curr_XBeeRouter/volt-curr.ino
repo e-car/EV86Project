@@ -32,7 +32,7 @@ String getVoltage() {
   }
   val_Vol = val_Vol / 3;
   
-  amplitude_Vol = val_Vol;
+  amplitude_Vol = (96.0*10/1024)*val_Vol;
   Serial.print("ad_data_Voltage:");
   Serial.println(val_Vol);
   Serial.print("data_Voltage: ");

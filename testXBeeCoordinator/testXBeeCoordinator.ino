@@ -6,17 +6,17 @@
 #include <signal.h> // you must write down this line to resolve problem between WiFiSocket and Serial communication
 #include <Wire.h>
 #include <WiFi.h>
-#include "EV86.h"
 #include "ev86XBee.h"
 #include "rgb_lcd.h"
 
-#define ROUTER1
-#define ROUTER2
-//#define ROUTER3
+// コーディネータが通信するXBeeの数
+#define XBEE_NODE1
+#define XBEE_NODE2
+//#define XBEE_NODE3
 
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 IPAddress ip;
-char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A   BUFFALO-4C7A25    304HWa-84F1A0
+char ssid[] = "iPhone_shinichi"; // your network SSID (name), nakayama:506A BUFFALO-4C7A25 304HWa-84F1A0
 char pass[] = "252554123sin"; // your network password (use for WPA, or use as key for WEP), nakayama:12345678 iebiu6ichxufg   11237204a
 int keyIndex = 0; // your network key Index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
@@ -29,50 +29,52 @@ boolean connectStatus;
 String sendWiFiData = "";
 /* -------------------------------- Wifi Parameters  -------------------------------- */
 
-// Routerの情報
+
+/* -------------------------------- XBee Parameters  -------------------------------- */
+// 他のNode情報
 typedef struct {
-  uint32_t h64Add;
-  uint32_t l64Add;
-  String nodeName;
-  String startAck;
+  uint32_t h64Add;   // XBeeデバイス識別用64bitアドレスの上位32bit
+  uint32_t l64Add;   // XBeeデバイス識別用64bitアドレスの下位32bit
+  String nodeName;   // Node名
+  String startAck;   // request識別子
   String sensorData; // 取得したセンサーデータ
-  int timeout;
-  boolean transmit;
-  boolean firstTrans;
+  boolean transmit;  // 接続状況確認フラグ
 } XBeeNode;
 
 // ルーター情報の設定
-#ifdef ROUTER1
-XBeeNode router1 = { 0x0013A200, 0x40E756D4, "RMXBee_ROUTER1", "startAck1", "None", 50, false, false };
+#ifdef XBEE_NODE1
+XBeeNode xbeeNode1 = { 0x0013A200, 0x40E756D4, "RMXBee_XBEE_NODE1", "startAck1", "None", false };
 #endif
-
-#ifdef ROUTER2
-XBeeNode router2 = { 0x0013A200, 0x40E756D3, "RMXBee_ROUTER2", "startAck2", "None", 50, false, false };
+#ifdef XBEE_NODE2
+XBeeNode xbeeNode2 = { 0x0013A200, 0x40E756D3, "RMXBee_XBEE_NODE2", "startAck2", "None", false };
 #endif
-
-#ifdef ROUTER3
-XBeeNode router3 = { 0x0013A200, 0x40993791, "RMXBee_ROUTER3", "startAck3", "None", 50, false, false };
+#ifdef XBEE_NODE3
+XBeeNode xbeeNode3 = { 0x0013A200, 0x40993791, "RMXBee_XBEE_NODE3", "startAck3", "None", false };
 #endif
-
-// コーディネーター用のインスタンスを生成
-EV86XBeeC coor = EV86XBeeC();
-
-// EV86インスタンス生成
-//EV86 ev86 = EV86(); // 今回使わない
-
-// LCD液晶ディスプレイインスタンスを生成
-rgb_lcd lcd;
-int clientCheckCount = 0;
-
-// プロトタイプ宣言
-boolean connectProcess(XBeeNode& router);
-void gettingData(XBeeNode& router);
 
 // 接続パラメータ
 String hostXBee = "HOST_XBee";
 String startReq = "startReq";
 String startAck = "startAck";
 String request =  "request";
+
+// コーディネーター用のインスタンスを生成
+EV86XBeeC coor = EV86XBeeC();
+/* -------------------------------- XBee Parameters  -------------------------------- */
+
+
+/* -------------------------------- LCD Parameters  -------------------------------- */
+// LCD液晶ディスプレイインスタンスを生成
+rgb_lcd lcd;
+int clientCheckCount = 0;
+/* -------------------------------- LCD Parameters  -------------------------------- */
+
+
+/* -------------------------------- Prottype declares -------------------------------- */
+boolean connectProcess(XBeeNode& router);
+void gettingData(XBeeNode& router);
+/* -------------------------------- Prottype declares -------------------------------- */
+
 
 void setup() {  
   /* you must write down a following line */
@@ -83,147 +85,90 @@ void setup() {
    * Serial1 : /dev/ttyMFD1 in Edison(Linux OS), thus Pin 0(Rx) and 1(Tx) in your arduino breakout board for Edison
    * Serial2 : /dev/ttyMFD2 in Edison(Linux OS), thus a terminal when you login to J3 in arduino breakout board for Edison with microUSB-B   
   */
-  lcd.begin(16, 2);                            // LCD液晶ディスプレイの初期化 (16列, 2行)
-  lcd.setCursor(0, 0); // (0列, 0行)
-  lcd.print("Setting Serial");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print("ports: PC & XBee");
+  
+  // LCD液晶ディスプレイの初期化 (16列, 2行)
+  lcd.begin(16, 2);                            
+  displayMsg("Setting Serial", "Ports: PC & XBee");
   
   Serial.begin(9600);                          // Arduino-PC間の通信
   Serial1.begin(9600);                         // Arduino-XBee間の通信
   coor.begin(Serial1);                         // XBeeにSerialの情報を渡す
   delay(5000);                                 // XBeeの初期化のために5秒間待機
-   
-  lcd.clear(); 
-  lcd.setCursor(0, 0); // (0列, 0行)　 
-  lcd.print("Trying to check");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print("XBees..."); 
-  delay(500); 
-    
-    
+     
   // HOST, REMOTE XBeeの設定を確認  
-  /***********************************************************************************/  
-    
-  // ホストXBeeの設定確認
+  /***********************************************************************************/ 
+  displayMsg("Trying to check", "XBees...");  
+  delay(500);
+  
+  // ホストXBee  
   coor.hsXBeeStatus();
-  lcd.clear();
-  lcd.setCursor(0, 0); // (0列, 0行)　 
-  lcd.print("Checked STATUS");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(hostXBee);
+  displayMsg("Checked STATUS", hostXBee); 
   delay(500);
   
-#ifdef ROUTER1  
+  // リモートXBee
+#ifdef XBEE_NODE1  
   // リモートXBeeのアドレス指定と設定情報の取得
-  coor.setDstAdd64(router1.h64Add, router1.l64Add);
+  coor.setDstAdd64(xbeeNode1.h64Add, xbeeNode1.l64Add);
   coor.rmXBeeStatus();
-  lcd.clear();
-  lcd.setCursor(0, 0); // (0列, 0行)　 
-  lcd.print("Checked STATUS");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router1.nodeName);
+  displayMsg("Checked STATUS", xbeeNode1.nodeName); 
   delay(500);
 #endif
   
-#ifdef ROUTER2
+#ifdef XBEE_NODE2
   // リモートXBeeのアドレス指定と設定情報の取得
-  coor.setDstAdd64(router2.h64Add, router2.l64Add);
+  coor.setDstAdd64(xbeeNode2.h64Add, xbeeNode2.l64Add);
   coor.rmXBeeStatus();
-  lcd.clear();
-  lcd.setCursor(0, 0); // (0列, 0行)　 
-  lcd.print("Checked STATUS");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router2.nodeName);
+  displayMsg("Checked STATUS", xbeeNode2.nodeName); 
   delay(500);
 #endif
   
-#ifdef ROUTER3  
+#ifdef XBEE_NODE3  
   // リモートXBeeのアドレス指定と設定情報の取得
-  coor.setDstAdd64(router3.h64Add, router3.l64Add);
+  coor.setDstAdd64(xbeeNode3.h64Add, xbeeNode3.l64Add);
   coor.rmXBeeStatus();
-  lcd.clear();
-  lcd.setCursor(0, 0); // (0列, 0行)　 
-  lcd.print("Checked STATUS");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router3.nodeName);
+  displayMsg("Checked STATUS", xbeeNode3.nodeName); 
   delay(500);
 #endif
     
-  // REMOTE XBeeとのコネクションを張る
+  // REMOTE XBeeとのファーストコネクションでセンサデータを通信できるか確認する
   /***********************************************************************************/  
-#ifdef ROUTER1  
+#ifdef XBEE_NODE1  
   // LCDにXBeeコネクション状況を知らせる
-  lcd.clear();
-  lcd.setCursor(0, 0); // (0列, 0行)
-  lcd.print("Connecting to");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router1.nodeName);
+  displayMsg("Connecting to", xbeeNode1.nodeName); 
   
-  //コネクション確立のためのセッション 
-  if (connectProcess(router1)) {
-    router1.firstTrans = true;
-    lcd.clear();
-    lcd.setCursor(0, 0); // (0列, 0行)　 
-    lcd.print("Connected to");
+  //コネクション確認のためのセッション 
+  if (connectProcess(xbeeNode1)) {
+    displayMsg("Connected to", xbeeNode1.nodeName);
   } else {
-    router1.firstTrans = false;
-    lcd.clear();
-    lcd.setCursor(0, 0); // (0列, 0行)　 
-    lcd.print("Disconnected to");
-  }
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router1.nodeName); 
-   
+    displayMsg("Disconnected to", xbeeNode1.nodeName);
+  } 
   delay(500); 
 #endif
 
-#ifdef ROUTER2
-  lcd.clear();
-  lcd.setCursor(0, 0); // (0列, 0行)
-  lcd.print("Connecting to");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router2.nodeName);
-   
-  //コネクション確立のためのセッション
-  if (connectProcess(router2)) {
-    router2.firstTrans = true;
-    lcd.clear();
-    lcd.setCursor(0, 0); // (0列, 0行)　 
-    lcd.print("Connected to");
-  } else {
-    router2.firstTrans = false;
-    lcd.clear();
-    lcd.setCursor(0, 0); // (0列, 0行)　 
-    lcd.print("Disconnected to");
-  }
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router2.nodeName);
+#ifdef XBEE_NODE2
+  // LCDにXBeeコネクション状況を知らせる
+  displayMsg("Connecting to", xbeeNode2.nodeName); 
   
-  delay(500);
+  //コネクション確認のためのセッション 
+  if (connectProcess(xbeeNode2)) {
+    displayMsg("Connected to", xbeeNode2.nodeName);
+  } else {
+    displayMsg("Disconnected to", xbeeNode2.nodeName);
+  } 
+  delay(500); 
 #endif
   
-#ifdef ROUTER3
-  lcd.clear();
-  lcd.setCursor(0, 0); // (0列, 0行)
-  lcd.print("Connecting to");
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router3.nodeName);
-   
-  //コネクション確立のためのセッション
-  if (connectProcess(router3)) {
-    router3.firstTrans = true;
-    lcd.clear();
-    lcd.setCursor(0, 0); // (0列, 0行)　 
-    lcd.print("Connected to");
+#ifdef XBEE_NODE3
+  // LCDにXBeeコネクション状況を知らせる
+  displayMsg("Connecting to", xbeeNode3.nodeName); 
+  
+  //コネクション確認のためのセッション 
+  if (connectProcess(xbeeNode3)) {
+    displayMsg("Connected to", xbeeNode3.nodeName);
   } else {
-    router3.firstTrans = false;
-    lcd.clear();
-    lcd.setCursor(0, 0); // (0列, 0行)　 
-    lcd.print("Disconnected to");
-  }
-  lcd.setCursor(0, 1); // (0列, 1行)
-  lcd.print(router3.nodeName);
+    displayMsg("Disconnected to", xbeeNode3.nodeName);
+  } 
+  delay(500); 
 #endif
 
    // WiFi環境の構築　別途、WiFi.inoプログラムを参照するように
@@ -259,12 +204,7 @@ void loop() {
       Serial.println(connectStatus);
       sendWiFiData = "";
       
-      lcd.clear();
-      lcd.setCursor(0, 0); // (0列, 0行)
-      lcd.print("Connected to");
-      lcd.setCursor(0, 1); // (0列, 1行)
-      lcd.print("WiFi Client");
-      
+      displayMsg("Connecting to", "WiFi Client");
       Serial.println("CHECK!!!");
       if (client.available() > 0) {
         socketTimeCount = 0;
@@ -279,69 +219,69 @@ void loop() {
             // センサーデータ取得 from XBee
             Serial.println("Sensor Data by XBee");
             /*****************************************************************/
-#ifdef ROUTER1
-            gettingData(router1);
+#ifdef XBEE_NODE1
+            gettingData(xbeeNode1);
             Serial.println("*******************************************"); 
 #endif
 
-#ifdef ROUTER2
-            gettingData(router2);  
+#ifdef XBEE_NODE2
+            gettingData(xbeeNode2);  
             Serial.println("*******************************************"); 
 #endif
 
-#ifdef ROUTER3
-            gettingData(router3);
+#ifdef XBEE_NODE3
+            gettingData(xbeeNode3);
             Serial.println("*******************************************"); 
 #endif      
             /*****************************************************************/
 
-#ifdef ROUTER1            
-            // send router1 data to client by wifi
-            if (router1.transmit) {
-              Serial.println(router1.sensorData);
+#ifdef XBEE_NODE1            
+            // send xbeeNode1 data to client by wifi
+            if (xbeeNode1.transmit) {
+              Serial.println(xbeeNode1.sensorData);
             } else {
-              Serial.println("Couldn't get router1.sensorData");
-              router1.sensorData = "NA,NA";
+              Serial.println("Couldn't get xbeeNode1.sensorData");
+              xbeeNode1.sensorData = "NA,NA";
             }
 #endif
 
-#ifdef ROUTER2
-            // send router2 data to client by wifi
-            if (router2.transmit) {
-              Serial.println(router2.sensorData);
+#ifdef XBEE_NODE2
+            // send xbeeNode2 data to client by wifi
+            if (xbeeNode2.transmit) {
+              Serial.println(xbeeNode2.sensorData);
             } else {
-              Serial.println("Couldn't get router1.sensorData");
-              router2.sensorData = "NA,NA";
+              Serial.println("Couldn't get xbeeNode1.sensorData");
+              xbeeNode2.sensorData = "NA,NA";
             }
 #endif
 
-#ifdef ROUTER3
-            // send router3 data to client by wifi
-            if (router3.transmit) {
-              Serial.println(router3.sensorData);
+#ifdef XBEE_NODE3
+            // send xbeeNode3 data to client by wifi
+            if (xbeeNode3.transmit) {
+              Serial.println(xbeeNode3.sensorData);
             } else {
-              Serial.println("Couldn't get router1.sensorData");
-              router3.sensorData = "NA,NA";
+              Serial.println("Couldn't get xbeeNode1.sensorData");
+              xbeeNode3.sensorData = "NA,NA";
             }
 #endif
 
-//#ifdef ROUTER1            
-//            sendWiFiData += router1.sensorData;
+//#ifdef XBEE_NODE1            
+//            sendWiFiData += xbeeNode1.sensorData;
 //            sendWiFiData += ",";
 //#endif
 //
-//#ifdef ROUTER2            
-//            sendWiFiData += router2.sensorData;
+//#ifdef XBEE_NODE2            
+//            sendWiFiData += xbeeNode2.sensorData;
 //            sendWiFiData += ",";
 //#endif
 //
-//#ifdef ROUTER3
-//            sendWiFiData += router3.sensorData;
+//#ifdef XBEE_NODE3
+//            sendWiFiData += xbeeNode3.sensorData;
 //#endif
 //            sendWiFiData += "20.0,20.0";
 
             sendWiFiData += "20.0,20.0,";
-            sendWiFiData += router2.sensorData;
+            sendWiFiData += xbeeNode2.sensorData;
             sendWiFiData += ",20.0,20.0";
                  
             Serial.print("send to WiFi [ ");
@@ -382,37 +322,25 @@ void loop() {
         
         // 接続状態の確認
         Serial.println("%%%%%%%%%%%%%%%%%%%Data_Status%%%%%%%%%%%%%%%%%%%%%%%");
-#ifdef ROUTER1        
-        // router firstTrans
-        Serial.print(router1.nodeName);
-        Serial.print(" First Connect Status : ");
-        Serial.println(router1.firstTrans);
+#ifdef XBEE_NODE1        
         // router
-        Serial.print(router1.nodeName);
+        Serial.print(xbeeNode1.nodeName);
         Serial.print(" Connect Status : ");
-        Serial.println(router1.transmit);
+        Serial.println(xbeeNode1.transmit);
 #endif
 
-#ifdef ROUTER2
-        // router2 firstTrans
-        Serial.print(router2.nodeName);
-        Serial.print(" First Connect Status : ");
-        Serial.println(router2.firstTrans);
-        // router2
-        Serial.print(router2.nodeName);
+#ifdef XBEE_NODE2
+        // xbeeNode2
+        Serial.print(xbeeNode2.nodeName);
         Serial.print(" Connect Status : ");
-        Serial.println(router2.transmit);
+        Serial.println(xbeeNode2.transmit);
 #endif
 
-#ifdef ROUTER3
-        // router3 firstTrans
-        Serial.print(router3.nodeName);
-        Serial.print(" First Connect Status : ");
-        Serial.println(router3.firstTrans);
-        // router3
-        Serial.print(router3.nodeName);
+#ifdef XBEE_NODE3
+        // xbeeNode3
+        Serial.print(xbeeNode3.nodeName);
         Serial.print(" Connect Status : ");
-        Serial.println(router3.transmit);
+        Serial.println(xbeeNode3.transmit);
 #endif
         Serial.println("%%%%%%%%%%%%%%%%%%%Data_Status%%%%%%%%%%%%%%%%%%%%%%%");
       } else {
@@ -425,11 +353,7 @@ void loop() {
       
        // 一定時間クライアントから応答がなければ、サーバー側からSocketを切る * client.connected()のバグ対策
        if (socketTimeCount > socketTimeOut) {
-          lcd.clear();
-          lcd.setCursor(0, 0); // (0列, 0行)　
-          lcd.print("Close Socket");
-          lcd.setCursor(0, 1); // (0列, 1行)
-          lcd.print(" from Server");
+          displayMsg("Close Socket", " from Server");
           delay(2000);
           lcd.clear();
           socketTimeCount = 0;
@@ -461,29 +385,29 @@ void loop() {
 }
 
 
-// コネクション確立のためのプロセス
+// 接続確認用パッチ
 boolean connectProcess(XBeeNode& router) {
-  // coor →  router
-  // coor ← router
-  // coor →  router
+  // XBee_Central →  XBee_Node  section1
+  // XBee_Central ← XBee_Node  section2
+  // XBee_Central →  XBee_Node  section3
   
-  // コネクションを取るXBeeのノード名を確認
+  // 今から接続確認をとるXBee_Nodeの名前を表示
   Serial.print("[[[[[ CONNECTION with ");
   Serial.print(router.nodeName);
   Serial.println(" ]]]]]");
   
-  // ルーターへの接続要求送信
+  // XBee_Nodeへの接続要求送信 (section1)
   coor.setDstAdd64(router.h64Add, router.l64Add);
   coor.sendData(startReq);
   Serial.println("[[[ send startReq ]]]");
   
   
-  // 受信パケットの確認
+  // XBee_Nodeからの受信パケットの確認
   Serial.print("[get Packet from ");
   Serial.print(router.nodeName);
   Serial.println("]");
     
-  // ルーターから接続応答が来ているかチェック  
+  // XBee_Nodeから接続応答が来ているかチェック(section2) 
   int stopCount = 0;
   for (int apiID, i = 0; (apiID = coor.getPacket()) != ZB_RX_RESPONSE && !coor.checkData(router.startAck); i++) {  
     
@@ -498,8 +422,8 @@ boolean connectProcess(XBeeNode& router) {
     Serial.print("Time Count : ");
     Serial.println(i);
     
-    // timeoutを超過したらルータへの接続要求を再送信する
-    if (i > router.timeout) {
+    // timeout(50)を超過したらXBee_Nodeへの接続要求を再送信する
+    if (i > 50) {
       coor.setDstAdd64(router.h64Add, router.l64Add);
       coor.sendData(startReq);
       i = 0;
@@ -512,7 +436,7 @@ boolean connectProcess(XBeeNode& router) {
     delay(40);
   }
   
-  // 接続応答を送信
+  // 接続応答を送信 (section3)
   coor.setDstAdd64(router.h64Add, router.l64Add);
   coor.sendData(startAck);
   Serial.println("send startAck\n");
@@ -521,8 +445,7 @@ boolean connectProcess(XBeeNode& router) {
   Serial.println("[get Packet]");
   int count = 0;
   while (true) {  
-    int apiID = coor.getPacket();
-      
+    int apiID = coor.getPacket();     
     if (apiID == ZB_TX_STATUS_RESPONSE) {
       if (coor.getConnectStatus() == SUCCESS) {
          break; 
@@ -553,8 +476,8 @@ void gettingData(XBeeNode& router) {
   int count = 0;
   while (true) {  
     int apiID = coor.getPacket();
-    
-    if (count > router.timeout) {
+    // timeout(50)に設定
+    if (count > 50) {
       router.transmit = false;
       coor.bufFlush();
       Serial.print("Couldn't receive sensor data from ");

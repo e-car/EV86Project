@@ -596,6 +596,8 @@ public:
 // EV86XBeeのCoordinatorクラス
 class EV86XBeeC : public EV86XBee {
 public:
+
+  
     EV86XBeeC();
     void sendRequest(String request);                // センサーデータのリクエスト用メソッド
 };

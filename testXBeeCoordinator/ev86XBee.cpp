@@ -559,8 +559,6 @@ int EV86XBee::getConnectStatus() {
 
 /*                 Coordinator                    */
 
-
-
 // コンストラクタ
 EV86XBeeC::EV86XBeeC() 
 : EV86XBee() // 親クラスのコンストラクタ呼び出し
@@ -584,33 +582,3 @@ EV86XBeeR::EV86XBeeR()
 : EV86XBee() // 親クラスのコンストラクタ呼び出し
 {}
 
-
-
-//void EV86XBeeR::sendSensorData(String send_buf) {
-//   
-//  //  // 送信データ作成            
-//  send_buf.concat((char)send_count);
-//  send_count++;
-//  if (send_count >= 10) {
-//    send_count = 0;
-//  }   
-//  uint8_t send_data[send_buf.length()]; // 送信データ用配列   
-//  
-//  // 送信の準備
-//  for (int i = 0; i < send_buf.length(); i++) {
-//    send_data[i] = send_buf.charAt(i);
-//  }
-//  
-//  //送信データの確認
-//  Serial.print("Send Data:");
-//  for (int i = 0; i < send_buf.length(); i++){
-//    Serial.print((char)send_data[i]);
-//  }
-//  Serial.print("\n");
-//   
-//  //データ送信
-//  _srcAdd64 = _zbRxResponse.getRemoteAddress64();                        // 宛名アドレスの取得
-//  _dstAdd64 = _srcAdd64;                                                 // 宛先アドレスに受信データの宛名アドレスを指定する
-//  _zbTxRequest = ZBTxRequest(_dstAdd64, send_data, sizeof(send_data)); 　//送信API作成
-//  _xbee.send(_zbTxRequest);  //送信
-//}

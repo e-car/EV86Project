@@ -52,10 +52,10 @@ String senData ="ROUTER3sensor";
 #endif
 
 // SPI & 熱電対式温度センサーパラメータ
-#define SLAVE1 53   //uno 10 mega 53
+#define SLAVE1 48   //uno 10 mega 48
 #define SLAVE2 49   //uno  9 mega 49
-unsigned int thermocouple;  // 14-Bit Thermocouple Temperature Data + 2-Bit
-unsigned int internal;      // 12-Bit Internal Temperature Data + 4-Bit
+//unsigned int thermocouple;  // 14-Bit Thermocouple Temperature Data + 2-Bit
+//unsigned int internal;      // 12-Bit Internal Temperature Data + 4-Bit
 float tempTime, tempTime2;
 float disp, disp2;                 // display value
 //char s[10], s2[10]; // 時間
@@ -63,20 +63,20 @@ float disp, disp2;                 // display value
 
 // プロトタイプ宣言
 String float2String(float value);
-String getTemp(int x);
+String getTemp(int ss_pin);
 
 void setup(){  
   // SPI用ピン設定
   pinMode(SLAVE1, OUTPUT);
-  digitalWrite(SLAVE1, HIGH);
+  //digitalWrite(SLAVE1, HIGH);
   pinMode(SLAVE2, OUTPUT);
-  digitalWrite(SLAVE2, HIGH);
+  //digitalWrite(SLAVE2, HIGH);
   
   // SPIプロトコル設定
   SPI.begin();
-  SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(SPI_CLOCK_DIV4);
-  SPI.setDataMode(SPI_MODE0);
+  SPI.setBitOrder(MSBFIRST);
+  SPI.setDataMode(SPI_MODE1);
   
   // PC−Arduino間
   Serial.begin(9600);

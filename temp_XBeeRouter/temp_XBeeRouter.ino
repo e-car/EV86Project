@@ -68,13 +68,13 @@ String getTemp(int ss_pin);
 void setup(){  
   // SPI用ピン設定
   pinMode(SLAVE1, OUTPUT);
-  //digitalWrite(SLAVE1, HIGH);
+  digitalWrite(SLAVE1, HIGH);
   pinMode(SLAVE2, OUTPUT);
-  //digitalWrite(SLAVE2, HIGH);
+  digitalWrite(SLAVE2, HIGH);
   
   // SPIプロトコル設定
   SPI.begin();
-  SPI.setClockDivider(SPI_CLOCK_DIV4);
+  SPI.setClockDivider(SPI_CLOCK_DIV32);
   SPI.setBitOrder(MSBFIRST);
   SPI.setDataMode(SPI_MODE1);
   

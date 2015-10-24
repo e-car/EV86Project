@@ -26,15 +26,8 @@ String getTemp(int ss_pin)
                                           // ->これで返信だけもらう(通称ダミーデータという)
   }
   digitalWrite(ss_pin, HIGH);          //  Disable the chip
-  
-  //生データを見ておく
-  /*
-  for(int i = 0; i < 2; i++){
-    Serial.print(spiData[i], HEX);
-  }
-  Serial.print(" ");
-  */
-  
+
+
   /* 上位2byte(spiData[0]とspiData[1])は熱電対先の温度情報をもつ */
   /* 下位2byte(spiData[2]とspiData[3])は内部基準点温度情報をもつ */
   /* なので2byteごとに分割します */
@@ -63,12 +56,20 @@ String getTemp(int ss_pin)
     
     /* step.2 戻り値Stringを作っていく */
     
+    int Integer = thermocouple >> 2;    //整数部(上位11bit)
+    int Decimal = thermocouple & 0x03;  //小数部(下位2ビット)
+    
+    
     if(sign){ //負数のとき
-      String str = String(thermocouple * (-0.25), DEC);
+      String str = String(Integer, DEC);
+      str += ".";
+      str += String(Decimal*25);
       return str;
     }
     else{     //正数のとき
-      String str = String(thermocouple * 0.25, DEC);
+      String str = String(Integer, DEC);
+      str += ".";
+      str += String(Decimal*25);
       return str;
     }
   }
